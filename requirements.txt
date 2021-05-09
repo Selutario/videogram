@@ -1,0 +1,7 @@
+python-telegram-bot
+numpy==1.16.5
+sklearn
+pandas
+pyyaml
+ruamel.yaml==0.17.4
+python-crontab
