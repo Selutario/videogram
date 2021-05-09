@@ -1,0 +1,38 @@
+# Path to token file
+token_path: ''
+
+# Name to be shown in some messages
+bot_name: ''
+
+# Video management options
+upload_enabled: true
+edit_enabled: true
+delete_enabled: false
+
+max_title_length: 40
+max_desc_length: 200
+max_kwords_length: 100
+
+# Admin users can always upload/edit/delete anything. Normal users can only edit/delete their own videos, if enabled
+admin_usernames: []
+
+# Banned users can't upload/edit/delete anything
+banned_usernames: []
+
+# How many results can be retrieved in one query (max 50)
+results_limit: 50
+
+# The lower, the more sensitive
+sensitivity: 0.13
+
+# Uploaded videos will be forwarded to this channel
+channel_id: 0
+
+# User ID to which a DB copy will be sent
+backup_user_id: 0
+
+# You can add new languages in locale/ folder
+language: es_ES
+
+# Enable debug logs
+logs_debug: false
