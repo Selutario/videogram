@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def start(update, context):
     """Send a message when the command /start is issued."""
-    update.message.reply_text(_("start_command").format('Belen_Estebot'))
+    update.message.reply_text(_("start_command").format(settings['bot_name']))
 
 
 def unknown(update, context):

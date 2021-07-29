@@ -54,9 +54,9 @@ def create_cronjob_backup(backup_hour):
     from crontab import CronTab
     cron = CronTab(user=True)
     job = cron.new(command=f'python3 {DB_BACKUP_SCRIPT}')
-    job.setall(f"0 {backup_hour} * * *")
+    job.setall(f"0 {backup_hour} * * 6")
     cron.write()
-    print(f'\033[92mOk\033[0m (The bot will send you a backup every day at {backup_hour}h. You can modify this with "crontab -e")')
+    print(f'\033[92mOk\033[0m (The bot will send you a backup every saturday at {backup_hour}h. You can modify this with "crontab -e")')
 
 
 if __name__ == '__main__':

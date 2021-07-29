@@ -14,11 +14,13 @@ UPLD_GET_VID, UPLD_TITLE, UPLD_DESC, UPLD_KEYWORDS, UPLD_CHECK_SAME = range(5)
 
 
 def upld_start(update, context):
-    if (settings['upload_enabled'] and update.effective_user.username not in settings['banned_usernames']) or \
-            update.effective_user.username in settings['admin_usernames']:
+    if (update.effective_user.username in settings['admin_usernames'] or
+            (settings['upload_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
+             (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("upld_send_video"))
         return UPLD_GET_VID
     else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=_("upload_disabled"))
         return ConversationHandler.END
 
 
@@ -36,9 +38,14 @@ def upld_video(update, context):
         }
     })
 
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text=_("upld_send_title").format(settings['max_title_length']))
-    return UPLD_TITLE
+    if context.user_data['upld']['duration'] > settings['max_video_length']:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=_("error_video_length").format(context.user_data['upld']['duration'], settings['max_video_length']))
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text=_("upld_send_title").format(settings['max_title_length']))
+        return UPLD_TITLE
 
 
 def upld_title(update, context):

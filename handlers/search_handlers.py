@@ -13,7 +13,9 @@ def inline_search(update, context):
     query = update.inline_query.query
     inline_results = list()
 
-    if query:
+    if query and (update.effective_user.username in settings['admin_usernames'] or not settings['closed_circle'] or
+                  update.effective_user.username in settings['closed_circle']):
+
         # Search requested videos
         result = utils.get_similar_videos(
             str(utils.cleaner(query)),

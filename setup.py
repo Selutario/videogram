@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='telegram_videos_bot',
-    version='1.0.0',
+    version='1.1.0',
     author='Selutario',
     author_email='selutario@gmail.com',
     install_requires=install_requires,

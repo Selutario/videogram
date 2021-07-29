@@ -11,11 +11,10 @@ DATA_PATH = join(BOT_PATH, 'data')
 SCHEMA_PATH = join(DATA_PATH, 'schema_db.sql')
 DB_PATH = join(DATA_PATH, 'bot.db')
 DB_BACKUP_SCRIPT = join(BOT_PATH, 'scripts', 'db_backup.py')
-print(DB_BACKUP_SCRIPT)
 LOGS_PATH = join(DATA_PATH, 'bot.log')
-SETTINGS_PATH = 'settings.yaml'
+SETTINGS_PATH = join(DATA_PATH, 'settings.yaml')
 
-locale_path = 'locale/'
+locale_path = join(BOT_PATH, 'locale')
 current_locale, encoding = getdefaultlocale()
 language = gettext.translation(current_locale, locale_path, [current_locale])
 language.install()

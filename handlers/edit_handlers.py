@@ -12,11 +12,13 @@ EDIT_GET_ID, EDIT_MENU, EDIT_CHOSEN_OPTION, EDIT_TITLE, EDIT_DESC, EDIT_KEYWORDS
 
 
 def edit_start(update, context):
-    if (settings['edit_enabled'] and update.effective_user.username not in settings['banned_usernames']) or \
-            update.effective_user.username in settings['admin_usernames']:
+    if (update.effective_user.username in settings['admin_usernames'] or
+            (settings['edit_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
+             (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_start"))
         return EDIT_GET_ID
     else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_disabled"))
         return ConversationHandler.END
 
 
@@ -190,22 +192,30 @@ def edit_video(update, context):
                   update['message']['video']['width'], update['message']['video']['height'],
                   update['message']['video']['duration'], context.user_data['edit']['id'])
 
-        if utils.execute_query(query=query, parameters=params):
-            utils.videos_info.update_model()
-            context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_video_ok"))
-            if context.user_data['edit']['msg_id']:
-                context.bot.edit_message_media(
-                    chat_id=context.user_data['edit']['chat_id'], message_id=context.user_data['edit']['msg_id'],
-                    media=InputMediaVideo(
-                        update['message']['video']['file_id'],
-                        caption=_("channel_info_caption").format(context.user_data['edit']['id'],
-                                                                 context.user_data['edit']['user_name'],
-                                                                 context.user_data['edit']['description'],
-                                                                 context.user_data['edit']['keywords']),
-                        parse_mode="HTML"))
+        # Check if video is shorter than required
+        if update['message']['video']['duration'] > settings['max_video_length']:
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=_("error_video_length").format(update['message']['video']['duration'],
+                                                    settings['max_video_length']))
         else:
-            context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
-        return ConversationHandler.END
+            # Upload the video and send it to the channel
+            if utils.execute_query(query=query, parameters=params):
+                utils.videos_info.update_model()
+                context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_video_ok"))
+                if context.user_data['edit']['msg_id']:
+                    context.bot.edit_message_media(
+                        chat_id=context.user_data['edit']['chat_id'], message_id=context.user_data['edit']['msg_id'],
+                        media=InputMediaVideo(
+                            update['message']['video']['file_id'],
+                            caption=_("channel_info_caption").format(context.user_data['edit']['id'],
+                                                                     context.user_data['edit']['user_name'],
+                                                                     context.user_data['edit']['description'],
+                                                                     context.user_data['edit']['keywords']),
+                            parse_mode="HTML"))
+            else:
+                context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+            return ConversationHandler.END
     else:
         if not update['message']['video']:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_need_video"))

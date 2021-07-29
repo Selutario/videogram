@@ -40,7 +40,10 @@ def execute_read_query(query, parameters=None):
 
 
 def cleaner(query):
-    document_test = query.replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('ñ', 'n').replace('ü', 'u')
+    document_test = query.replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u')\
+        .replace('ñ', 'n').replace('ü', 'u').replace('1', 'one').replace('2', 'two').replace('3', 'three').\
+        replace('4', 'four').replace('5', 'five').replace('6', 'six').replace('7', 'seven').replace('8', 'eight').\
+        replace('9', 'nine').replace('0', 'zero')
     # Remove Unicode
     document_test = re.sub(r'[^\x00-\x7F]+', ' ', document_test)
     # Remove Mentions

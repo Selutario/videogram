@@ -9,6 +9,7 @@ upload_enabled: true
 edit_enabled: true
 delete_enabled: false
 
+max_video_length: 30
 max_title_length: 40
 max_desc_length: 200
 max_kwords_length: 100
@@ -18,6 +19,9 @@ admin_usernames: []
 
 # Banned users can't upload/edit/delete anything
 banned_usernames: []
+
+# If any user is specified in this list, only they can use the bot (upload/edit/delete and search)
+closed_circle: []
 
 # How many results can be retrieved in one query (max 50)
 results_limit: 50
