@@ -66,7 +66,8 @@ def delete_get_id(update, context):
 def on_chosen_delete_option(update, context):
     update.callback_query.answer()
     if update.callback_query.data == 'yes':
-        if utils.execute_query(query="DELETE FROM video_data WHERE id = ?", parameters=(context.user_data['delete']['id'],)):
+        if utils.execute_query(query="DELETE FROM video_data WHERE id = ?",
+                               parameters=(context.user_data['delete']['id'],)):
             utils.videos_info.update_model()
             if context.user_data['delete']['msg_id']:
                 context.bot.delete_message(chat_id=context.user_data['delete']['chat_id'],

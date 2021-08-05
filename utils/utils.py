@@ -18,6 +18,7 @@ def execute_query(query, parameters=None):
     with connect(DB_PATH) as connection:
         connection.row_factory = Row
         cursor = connection.cursor()
+        cursor.execute("PRAGMA foreign_keys = ON")
 
         try:
             cursor.execute(query, parameters) if parameters else cursor.execute(query)
@@ -93,13 +94,29 @@ def get_similar_videos(q, df, vt, n_videos, sensitivity=settings['sensitivity'])
         return result
 
 
-def store_sent_video(user_id, video_id, user_name):
-    add_sent_video = """
-        INSERT INTO
-          sent_videos (user_id, video_id, user_name, date)
-        VALUES (?, ?, ?, ?)"""
-    execute_query(query=add_sent_video,
-                  parameters=(user_id, video_id, user_name, datetime.now(timezone.utc)))
+def store_user_details(update):
+    """Save user data (name, username and chat id if not in a group).
+
+    Parameters
+    ----------
+    update : telegram.update.Update
+        Object representing incoming update with request data.
+
+    Returns
+    -------
+    bool
+        SQL query result.
+    """
+    if getattr(update, 'effective_chat') and update.effective_chat.type == 'private':
+        query = f"INSERT OR REPLACE INTO users (id, user_name, first_name, last_name, chat_id) VALUES(?, ?, ?, ?, ?)"
+        params = (update.effective_user.id, update.effective_user.username, update.effective_user.first_name,
+                  update.effective_user.last_name, update.effective_chat.id)
+    else:
+        query = "INSERT OR REPLACE INTO users (id, user_name, first_name, last_name) VALUES(?, ?, ?, ?)"
+        params = (update.effective_user.id, update.effective_user.username, update.effective_user.first_name,
+                  update.effective_user.last_name)
+
+    return execute_query(query, params)
 
 
 class VideosInfo:

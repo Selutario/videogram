@@ -25,8 +25,9 @@ def edit_start(update, context):
 def edit_get_id(update, context):
     common_query = """
     SELECT video_data.id, video_data.title, video_data.description, video_data.keywords, video_data.file_id, 
-    video_data.user_id, video_data.user_name, channel_messages.msg_id, channel_messages.chat_id FROM video_data 
-    LEFT JOIN channel_messages ON video_data.id=channel_messages.video_id WHERE 
+    video_data.user_id, channel_messages.msg_id, channel_messages.chat_id, users.id, users.user_name, users.first_name
+    FROM video_data LEFT JOIN channel_messages ON video_data.id=channel_messages.video_id LEFT JOIN users on
+    video_data.user_id=users.id WHERE 
     """
 
     if update['message']['video']:
@@ -51,7 +52,7 @@ def edit_get_id(update, context):
                     'keywords': dict_result['keywords'],
                     'file_id': dict_result['file_id'],
                     'user_id': dict_result['user_id'],
-                    'user_name': dict_result['user_name'],
+                    'user_name': dict_result['user_name'] if dict_result['user_name'] else dict_result['user_name'],
                     'msg_id': dict_result['msg_id'],
                     'chat_id': dict_result['chat_id'],
                 }
@@ -115,7 +116,7 @@ def on_chosen_edit_option(update, context):
 def edit_title(update, context):
     if update['message']['text'] and len(update['message']['text']) <= settings["max_title_length"]:
         if utils.execute_query(query="UPDATE video_data SET title = ? WHERE id = ?",
-                         parameters=(update['message']['text'], context.user_data['edit']['id'])):
+                               parameters=(update['message']['text'], context.user_data['edit']['id'])):
             utils.videos_info.update_model()
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_title_ok"))
         else:

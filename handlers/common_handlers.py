@@ -11,14 +11,15 @@ from utils import utils
 from utils.common import settings
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s: %(message)s',
-                    level=logging.DEBUG if settings['logs_debug'] else logging.INFO,
-                    filename=utils.LOGS_PATH)
+                    level=logging.DEBUG if settings['logs_debug'] else logging.INFO)
+                    # filename=utils.LOGS_PATH)
 logger = logging.getLogger(__name__)
 
 
 def start(update, context):
     """Send a message when the command /start is issued."""
     update.message.reply_text(_("start_command").format(settings['bot_name']))
+    utils.store_user_details(update)
 
 
 def unknown(update, context):
@@ -38,8 +39,13 @@ def error(update, context):
 def get_random_video(update, context):
     random_result = choice(utils.videos_info.videos_info_list)
 
-    query = "INSERT INTO sent_random (video_id, title, user_id, user_name, date) VALUES (?, ?, ?, ?, ?)"
-    params = (random_result['id'], random_result['title'], update.effective_user.id, update.effective_user.username,
-              datetime.now(timezone.utc))
-    utils.execute_query(query=query, parameters=params)
+    if not utils.store_user_details(update):
+        context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+        return ConversationHandler.END
+
+    query = "INSERT INTO sent_random (video_id, title, user_id, date) VALUES (?, ?, ?, ?)"
+    params = (random_result['id'], random_result['title'], update.effective_user.id, datetime.now(timezone.utc))
+    if not utils.execute_query(query, params):
+        context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+
     context.bot.send_video(chat_id=update.effective_chat.id, video=random_result['file_id'])

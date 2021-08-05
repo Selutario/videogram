@@ -18,6 +18,11 @@ def upld_start(update, context):
             (settings['upload_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
              (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("upld_send_video"))
+
+        if not utils.store_user_details(update):
+            context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+            return ConversationHandler.END
+
         return UPLD_GET_VID
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("upload_disabled"))
@@ -35,6 +40,7 @@ def upld_video(update, context):
             'duration': update['message']['video']['duration'],
             'user_id': update.effective_user.id,
             'user_name': update.effective_user.username,
+            'first_name': update.effective_user.first_name,
         }
     })
 
@@ -91,26 +97,31 @@ def upld_keywords(update, context):
     if len(update['message']['text']) <= settings['max_kwords_length']:
         context.user_data['upld'].update({'keywords': update['message']['text']})
 
+        if context.user_data['upld']['user_name']:
+            user = context.user_data['upld']['user_name']
+        else:
+            user = context.user_data['upld']['first_name']
+
         video_msg = context.bot.send_video(
             chat_id=settings['channel_id'], video=context.user_data['upld']['file_id'],
             caption=_("channel_info_caption").format(context.user_data['upld']['id'],
-                                                     context.user_data['upld']['user_name'],
+                                                     user,
                                                      context.user_data['upld']['desc'],
                                                      context.user_data['upld']['keywords']),
             parse_mode="HTML")
-        query = "INSERT INTO channel_messages (msg_id, chat_id, video_id) VALUES (?, ?, ?)"
-        params = (video_msg['message_id'], video_msg['chat']['id'], context.user_data['upld']['id'])
+
+        query = "INSERT INTO video_data (id, title, description, keywords, file_id, file_unique_id, width, height, " \
+                "duration, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        params = (context.user_data['upld']['id'], context.user_data['upld']['title'],
+                  context.user_data['upld']['desc'], context.user_data['upld']['keywords'],
+                  video_msg['video']['file_id'], video_msg['video']['file_unique_id'], video_msg['video']['width'],
+                  video_msg['video']['height'], video_msg['video']['duration'], context.user_data['upld']['user_id'])
         if not utils.execute_query(query, params):
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
             return ConversationHandler.END
 
-        query = "INSERT INTO video_data (id, title, description, keywords, file_id, file_unique_id, width, height, " \
-                "duration, user_id, user_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        params = (context.user_data['upld']['id'], context.user_data['upld']['title'],
-                  context.user_data['upld']['desc'], context.user_data['upld']['keywords'],
-                  video_msg['video']['file_id'], video_msg['video']['file_unique_id'], video_msg['video']['width'],
-                  video_msg['video']['height'], video_msg['video']['duration'], context.user_data['upld']['user_id'],
-                  context.user_data['upld']['user_name'])
+        query = "INSERT INTO channel_messages (msg_id, chat_id, video_id) VALUES (?, ?, ?)"
+        params = (video_msg['message_id'], video_msg['chat']['id'], context.user_data['upld']['id'])
         if utils.execute_query(query, params):
             utils.videos_info.update_model()
             context.bot.send_message(
