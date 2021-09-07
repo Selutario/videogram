@@ -50,7 +50,7 @@ msgstr "<b>ID:</b> <code>{0}</code>\n"
 
 # common_handlers.py
 msgid "start_command"
-msgstr "Hey. Write @{0} followed by soome text to search for a video. For example: @{0} hello"
+msgstr "Hey. Write @{0} followed by some text to search for a video. For example: @{0} hello"
 
 msgid "unknown_command"
 msgstr "Don't invent, please..."
@@ -137,8 +137,6 @@ msgid "upld_same_video"
 msgstr "It's the same: cancel 👎"
 
 msgid "upld_send_keywords"
-msgstr "Por último, algunas palabras clave que no aparezcan en la transcripción (max {0} caracteres). "
-"P. ej: belen esteban sueño cansado cansada"
 msgstr "Finally, some keywords that don't appear in the transcription (max {0} characters). For example: "
 "belen esteban sleep tired"
 
