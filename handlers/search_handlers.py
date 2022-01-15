@@ -37,9 +37,6 @@ def inline_search(update, context):
 
 
 def on_chosen_video(update, context):
-    if not utils.store_user_details(update):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
-
     query = "INSERT INTO sent_videos (user_id, query, video_id, date) VALUES (?, ?, ?, ?)"
     params = (update.chosen_inline_result.from_user.id, update.chosen_inline_result.query,
               update.chosen_inline_result.result_id, datetime.now(timezone.utc))

@@ -108,11 +108,11 @@ def store_user_details(update):
         SQL query result.
     """
     if getattr(update, 'effective_chat') and update.effective_chat.type == 'private':
-        query = f"INSERT OR REPLACE INTO users (id, user_name, first_name, last_name, chat_id) VALUES(?, ?, ?, ?, ?)"
+        query = f"INSERT IGNORE INTO users (id, user_name, first_name, last_name, chat_id) VALUES(?, ?, ?, ?, ?)"
         params = (update.effective_user.id, update.effective_user.username, update.effective_user.first_name,
                   update.effective_user.last_name, update.effective_chat.id)
     else:
-        query = "INSERT OR REPLACE INTO users (id, user_name, first_name, last_name) VALUES(?, ?, ?, ?)"
+        query = "INSERT IGNORE INTO users (id, user_name, first_name, last_name) VALUES(?, ?, ?, ?)"
         params = (update.effective_user.id, update.effective_user.username, update.effective_user.first_name,
                   update.effective_user.last_name)
 

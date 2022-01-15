@@ -18,11 +18,6 @@ def upld_start(update, context):
             (settings['upload_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
              (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("upld_send_video"))
-
-        if not utils.store_user_details(update):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
-            return ConversationHandler.END
-
         return UPLD_GET_VID
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("upload_disabled"))

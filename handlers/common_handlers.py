@@ -42,10 +42,6 @@ def get_random_video(update, context):
 
     random_result = choice(utils.videos_info.videos_info_list)
 
-    if not utils.store_user_details(update):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
-        return ConversationHandler.END
-
     query = "INSERT INTO sent_random (video_id, title, user_id, date) VALUES (?, ?, ?, ?)"
     params = (random_result['id'], random_result['title'], update.effective_user.id, datetime.now(timezone.utc))
     if not utils.execute_query(query, params):
