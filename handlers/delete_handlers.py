@@ -12,18 +12,21 @@ DELETE_GET_ID, DELETE_CHOSEN_OPTION = range(2)
 
 
 def delete_start(update, context):
-    if (settings['delete_enabled'] and update.effective_user.username not in settings['banned_usernames']) or \
-            update.effective_user.username in settings['admin_usernames']:
+    if (update.effective_user.username in settings['admin_usernames'] or
+            (settings['delete_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
+             (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("delete_start"))
         return DELETE_GET_ID
     else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=_("delete_disabled"))
         return ConversationHandler.END
 
 
 def delete_get_id(update, context):
     common_query = """
     SELECT video_data.id, video_data.title, video_data.description, video_data.file_id, channel_messages.msg_id, 
-    channel_messages.chat_id FROM video_data LEFT JOIN channel_messages ON video_data.id=channel_messages.video_id WHERE 
+    channel_messages.chat_id, video_data.user_id FROM video_data LEFT JOIN channel_messages ON 
+    video_data.id=channel_messages.video_id WHERE 
     """
 
     if update['message']['video']:
@@ -44,6 +47,11 @@ def delete_get_id(update, context):
                 'msg_id': dict_result['msg_id']
             }
         })
+        if str(update.effective_user.id) != dict_result['user_id'] and \
+                str(update.effective_user.username) not in settings['admin_usernames']:
+            context.bot.send_message(chat_id=update.effective_chat.id, text=_("delete_no_permissions"))
+            return ConversationHandler.END
+
         menu_opt = [[InlineKeyboardButton('✅', callback_data='yes'),
                      InlineKeyboardButton('❌', callback_data='no')]]
         context.bot.send_video(chat_id=update.effective_chat.id, video=dict_result['file_id'],
@@ -58,7 +66,8 @@ def delete_get_id(update, context):
 def on_chosen_delete_option(update, context):
     update.callback_query.answer()
     if update.callback_query.data == 'yes':
-        if utils.execute_query(query="DELETE FROM video_data WHERE id = ?", parameters=(context.user_data['delete']['id'],)):
+        if utils.execute_query(query="DELETE FROM video_data WHERE id = ?",
+                               parameters=(context.user_data['delete']['id'],)):
             utils.videos_info.update_model()
             if context.user_data['delete']['msg_id']:
                 context.bot.delete_message(chat_id=context.user_data['delete']['chat_id'],

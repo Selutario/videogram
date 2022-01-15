@@ -11,11 +11,11 @@ from threading import Thread
 from ruamel.yaml import YAML
 from telegram import ext, error
 
-from utils.common import DB_PATH, SCHEMA_PATH, DB_BACKUP_SCRIPT
+from utils.common import DB_PATH, SCHEMA_PATH, DB_BACKUP_SCRIPT, SETTINGS_PATH
 
 telegram_inst_step = 0
 yaml = YAML()
-with open('settings.yaml', 'r') as f:
+with open(SETTINGS_PATH, 'r') as f:
     settings = yaml.load(f)
 
 
@@ -30,7 +30,7 @@ def start(update, context):
     if telegram_inst_step == 0:
         try:
             if update.message.chat.type == 'private':
-                print(f"\033[92mOk\033[0m (User ID {update.message['chat']['id']})")
+                print(f"\033[92mOk\033[0m (User chat ID {update.message['chat']['id']})")
                 print("\n6. Join the bot to a channel (public or private) as administrator, and post a message in it.")
                 settings['backup_user_id'] = update.message['chat']['id']
                 settings['admin_usernames'] = list([update.message['chat']['username']])
@@ -41,7 +41,7 @@ def start(update, context):
         try:
             print(f"\033[92mOk\033[0m (Channel ID: {update['channel_post']['chat']['id']})")
             settings['channel_id'] = update['channel_post']['chat']['id']
-            with open('settings.yaml', 'w') as f:
+            with open(SETTINGS_PATH, 'w') as f:
                 yaml.dump(settings, f)
 
             print("\n\nPlease wait... ")
@@ -54,9 +54,9 @@ def create_cronjob_backup(backup_hour):
     from crontab import CronTab
     cron = CronTab(user=True)
     job = cron.new(command=f'python3 {DB_BACKUP_SCRIPT}')
-    job.setall(f"0 {backup_hour} * * *")
+    job.setall(f"0 {backup_hour} * * 6")
     cron.write()
-    print(f'\033[92mOk\033[0m (The bot will send you a backup every day at {backup_hour}h. You can modify this with "crontab -e")')
+    print(f'\033[92mOk\033[0m (The bot will send you a backup every saturday at {backup_hour}h. You can modify this with "crontab -e")')
 
 
 if __name__ == '__main__':

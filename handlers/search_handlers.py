@@ -13,7 +13,9 @@ def inline_search(update, context):
     query = update.inline_query.query
     inline_results = list()
 
-    if query:
+    if query and (update.effective_user.username in settings['admin_usernames'] or not settings['closed_circle'] or
+                  update.effective_user.username in settings['closed_circle']):
+
         # Search requested videos
         result = utils.get_similar_videos(
             str(utils.cleaner(query)),
@@ -35,8 +37,8 @@ def inline_search(update, context):
 
 
 def on_chosen_video(update, context):
-    query = "INSERT INTO sent_videos (user_id, query, video_id, user_name, date) VALUES (?, ?, ?, ?, ?)"
+    query = "INSERT INTO sent_videos (user_id, query, video_id, date) VALUES (?, ?, ?, ?)"
     params = (update.chosen_inline_result.from_user.id, update.chosen_inline_result.query,
-              update.chosen_inline_result.result_id, update.chosen_inline_result.from_user.username,
-              datetime.now(timezone.utc))
-    utils.execute_query(query=query, parameters=params)
+              update.chosen_inline_result.result_id, datetime.now(timezone.utc))
+    if not utils.execute_query(query=query, parameters=params):
+        context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
