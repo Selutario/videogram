@@ -26,6 +26,9 @@ closed_circle: []
 # How many results can be retrieved in one query (max 50)
 results_limit: 50
 
+# Show n random videos when no query is received
+empty_query_videos: 50
+
 # The lower, the more sensitive
 sensitivity: 0.13
 

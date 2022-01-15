@@ -16,6 +16,9 @@ SETTINGS_PATH = join(DATA_PATH, 'settings.yaml')
 with open(SETTINGS_PATH, 'r') as f:
     settings = safe_load(f)
 
+results_limit = min(settings['results_limit'], 50)
+empty_query_videos = min(settings['empty_query_videos'], 50)
+
 locale_path = join(BOT_PATH, 'locale')
 language = gettext.translation(settings['language'], locale_path, [settings['language']])
 language.install()

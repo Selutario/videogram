@@ -1,31 +1,38 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
+import random
 from datetime import datetime, timezone
 
 from telegram import InlineQueryResultCachedVideo
 
 from utils import utils
-from utils.common import settings
+from utils.common import settings, results_limit, empty_query_videos
 
 
 def inline_search(update, context):
     query = update.inline_query.query
-    inline_results = list()
+    inline_results = []
+    result = []
 
-    if query and (update.effective_user.username in settings['admin_usernames'] or not settings['closed_circle'] or
-                  update.effective_user.username in settings['closed_circle']):
+    if update.effective_user.username in settings['admin_usernames'] or not settings['closed_circle'] or \
+            update.effective_user.username in settings['closed_circle']:
 
-        # Search requested videos
-        result = utils.get_similar_videos(
-            str(utils.cleaner(query)),
-            utils.videos_info.desc_kwds_df,
-            utils.videos_info.desc_kwds_vt,
-            len(utils.videos_info)
-        )
+        if query:
+            # Search requested videos
+            result = utils.get_similar_videos(
+                str(utils.cleaner(query)),
+                utils.videos_info.desc_kwds_df,
+                utils.videos_info.desc_kwds_vt,
+                len(utils.videos_info)
+            )
+        else:
+            # Obtain random videos
+            n_videos = len(utils.videos_info.videos_info_list)
+            result = random.sample(range(n_videos), min(empty_query_videos, n_videos))
 
         for idx in result:
-            if len(inline_results) >= min(settings['results_limit'], 50):
+            if len(inline_results) >= results_limit:
                 break
             inline_results.append(
                 InlineQueryResultCachedVideo(id=utils.videos_info.videos_info_list[idx]['id'],
