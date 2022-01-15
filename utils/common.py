@@ -4,7 +4,6 @@
 from os.path import join, dirname, abspath
 from yaml import safe_load
 import gettext
-from locale import getdefaultlocale
 
 BOT_PATH = dirname(dirname(abspath(__file__)))
 DATA_PATH = join(BOT_PATH, 'data')
@@ -14,10 +13,9 @@ DB_BACKUP_SCRIPT = join(BOT_PATH, 'scripts', 'db_backup.py')
 LOGS_PATH = join(DATA_PATH, 'bot.log')
 SETTINGS_PATH = join(DATA_PATH, 'settings.yaml')
 
-locale_path = join(BOT_PATH, 'locale')
-current_locale, encoding = getdefaultlocale()
-language = gettext.translation(current_locale, locale_path, [current_locale])
-language.install()
-
 with open(SETTINGS_PATH, 'r') as f:
     settings = safe_load(f)
+
+locale_path = join(BOT_PATH, 'locale')
+language = gettext.translation(settings['language'], locale_path, [settings['language']])
+language.install()
