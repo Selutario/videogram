@@ -26,6 +26,9 @@ msgid "error_video_not_found"
 msgstr "I could not find that video. It's possible that it is in your Telegram app cache, but not in my "
 "database anymore"
 
+msgid "error_video_length"
+msgstr "This video exceeds the maximum length allowed ({0}/{1} seconds). Please, trim it down."
+
 msgid "error_title_length"
 msgstr "You have exceeded the maximum length ({0}/{1} characters). Please, send me a shorter title."
 
@@ -63,6 +66,12 @@ msgstr "Cancelling... ❌"
 msgid "delete_start"
 msgstr "Send me again the video you want to delete (🎥) or its ID (🆔)."
 
+msgid "delete_disabled"
+msgstr "Video deletion is disabled 🔒"
+
+msgid "delete_no_permissions"
+msgstr "You do not have permission to delete this video 🚫"
+
 msgid "delete_confirm"
 msgstr "<b>Title:</b> {0}\n<b>Description:</b> {1}\n\nAre you sure you want to delete this video?"
 
@@ -73,6 +82,9 @@ msgstr "Video deleted successfully 🎉"
 # edit_handlers.py
 msgid "edit_start"
 msgstr "Send me again the video you want to edit (🎥) or its ID (🆔)."
+
+msgid "edit_disabled"
+msgstr "Video editing is disabled 🔒"
 
 msgid "edit_no_permissions"
 msgstr "You don't have permission to edit this video 🚫"
@@ -120,6 +132,9 @@ msgstr "I need a video."
 # upload_handlers.py
 msgid "upld_send_video"
 msgstr "Send me a video 🎥."
+
+msgid "upload_disabled"
+msgstr "Video upload is disabled 🔒"
 
 msgid "upld_send_title"
 msgstr "Now send me the title (max {0} characters)."

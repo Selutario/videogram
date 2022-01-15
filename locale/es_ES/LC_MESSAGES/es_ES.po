@@ -61,6 +61,7 @@ msgstr "No inventes, por favor..."
 msgid "cancel_command"
 msgstr "Cancelando... ❌"
 
+
 # delete_handlers.py
 msgid "delete_start"
 msgstr "Reenvíame el video que quieres eliminar (🎥) o su ID (🆔)."
