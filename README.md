@@ -1,5 +1,5 @@
 # Videogram 🤖
-## Desscription
+## Description
 Telegram bot to search and send videos in any chat (inline, like @gif). Users can upload/edit/delete their own videos.
 
 ## How to install
