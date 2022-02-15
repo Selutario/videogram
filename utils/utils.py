@@ -84,7 +84,10 @@ def get_similar_videos(q, df, vt, n_videos, sensitivity=settings['sensitivity'])
         sim = {}  # Calculate the similarity
 
         for i in range(n_videos):
-            sim[i] = dot(df.loc[:, i].values, q_vec) / norm(df.loc[:, i]) * norm(q_vec)
+            try:
+                sim[i] = dot(df.loc[:, i].values, q_vec) / norm(df.loc[:, i]) * norm(q_vec)
+            except ZeroDivisionError:
+                pass
 
         # Sort the values
         sim_sorted = sorted(sim.items(), key=lambda x: x[1], reverse=True)  # Print the articles and their similarity values
