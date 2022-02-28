@@ -29,6 +29,9 @@ msgstr "No he podido encontrar ese vídeo. Es posible que esté cacheado en tu a
 msgid "error_video_length"
 msgstr "El video supera la duración máxima ({0}/{1} segundos). Por favor, recórtalo."
 
+msgid "error_video_type"
+msgstr "El formato de este video es {0}, el cual es inválido. Por favor, intentalo con otro formato."
+
 msgid "error_title_length"
 msgstr "Has superado la longitud máxima ({0}/{1} caracteres). Por favor, envíame un título más corto."
 

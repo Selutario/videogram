@@ -39,7 +39,7 @@ channel_id: 0
 backup_user_id: 0
 
 # You can add new languages in locale/ folder
-language: es_ES
+language: en_US
 
 # Enable debug logs
 logs_debug: false

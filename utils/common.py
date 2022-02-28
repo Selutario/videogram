@@ -22,3 +22,7 @@ empty_query_videos = min(settings['empty_query_videos'], 50)
 locale_path = join(BOT_PATH, 'locale')
 language = gettext.translation(settings['language'], locale_path, [settings['language']])
 language.install()
+
+INVALID_MIME_TYPES = [
+    'video/quicktime'
+]

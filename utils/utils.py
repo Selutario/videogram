@@ -110,14 +110,10 @@ def store_user_details(update):
     bool
         SQL query result.
     """
-    if getattr(update, 'effective_chat') and update.effective_chat.type == 'private':
-        query = f"INSERT IGNORE INTO users (id, user_name, first_name, last_name, chat_id) VALUES(?, ?, ?, ?, ?)"
-        params = (update.effective_user.id, update.effective_user.username, update.effective_user.first_name,
-                  update.effective_user.last_name, update.effective_chat.id)
-    else:
-        query = "INSERT IGNORE INTO users (id, user_name, first_name, last_name) VALUES(?, ?, ?, ?)"
-        params = (update.effective_user.id, update.effective_user.username, update.effective_user.first_name,
-                  update.effective_user.last_name)
+
+    query = "INSERT OR IGNORE INTO users (id, user_name, first_name, last_name) VALUES(?, ?, ?, ?)"
+    params = (update.effective_user.id, update.effective_user.username, update.effective_user.first_name,
+              update.effective_user.last_name)
 
     return execute_query(query, params)
 

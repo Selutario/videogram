@@ -55,6 +55,5 @@ CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY,
           user_name TEXT,
           first_name TEXT,
-          last_name TEXT,
-          chat_id TEXT
+          last_name TEXT
 );

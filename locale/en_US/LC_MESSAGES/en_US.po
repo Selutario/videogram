@@ -29,6 +29,9 @@ msgstr "I could not find that video. It's possible that it is in your Telegram a
 msgid "error_video_length"
 msgstr "This video exceeds the maximum length allowed ({0}/{1} seconds). Please, trim it down."
 
+msgid "error_video_type"
+msgstr "This video format is {0}, which is invalid. Please try another format."
+
 msgid "error_title_length"
 msgstr "You have exceeded the maximum length ({0}/{1} characters). Please, send me a shorter title."
 

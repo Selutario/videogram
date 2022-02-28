@@ -8,7 +8,7 @@ from telegram.ext import ConversationHandler, CommandHandler, Filters, MessageHa
 
 from handlers.common_handlers import cancel
 from utils import utils
-from utils.common import settings
+from utils.common import settings, INVALID_MIME_TYPES
 
 UPLD_GET_VID, UPLD_TITLE, UPLD_DESC, UPLD_KEYWORDS, UPLD_CHECK_SAME = range(5)
 
@@ -43,6 +43,10 @@ def upld_video(update, context):
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=_("error_video_length").format(context.user_data['upld']['duration'], settings['max_video_length']))
+    elif update['message']['video']['mime_type'] in INVALID_MIME_TYPES:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=_("error_video_type").format(update['message']['video']['mime_type']))
     else:
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text=_("upld_send_title").format(settings['max_title_length']))
@@ -111,7 +115,8 @@ def upld_keywords(update, context):
                   context.user_data['upld']['desc'], context.user_data['upld']['keywords'],
                   video_msg['video']['file_id'], video_msg['video']['file_unique_id'], video_msg['video']['width'],
                   video_msg['video']['height'], video_msg['video']['duration'], context.user_data['upld']['user_id'])
-        if not utils.execute_query(query, params):
+
+        if not utils.store_user_details(update) or not utils.execute_query(query, params):
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
             return ConversationHandler.END
 
