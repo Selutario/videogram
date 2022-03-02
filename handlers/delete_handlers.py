@@ -1,6 +1,8 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
+import html
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, MessageHandler, CommandHandler, Filters, CallbackQueryHandler
 
@@ -30,10 +32,11 @@ def delete_get_id(update, context):
     """
 
     if update['message']['video']:
-        result = utils.execute_read_query(
-            query=common_query+"video_data.file_unique_id = ?", parameters=(update['message']['video']['file_unique_id'],))
+        result = utils.execute_read_query(query=common_query+"video_data.file_unique_id = ?",
+                                          parameters=(update['message']['video']['file_unique_id'],))
     elif update['message']['text']:
-        result = utils.execute_read_query(query=common_query+"video_data.id = ?", parameters=(update['message']['text'],))
+        result = utils.execute_read_query(query=common_query+"video_data.id = ?",
+                                          parameters=(update['message']['text'],))
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("need_video_or_id"))
         return
@@ -55,7 +58,8 @@ def delete_get_id(update, context):
         menu_opt = [[InlineKeyboardButton('✅', callback_data='yes'),
                      InlineKeyboardButton('❌', callback_data='no')]]
         context.bot.send_video(chat_id=update.effective_chat.id, video=dict_result['file_id'],
-                               caption=_("delete_confirm").format(dict_result['title'], dict_result['description']),
+                               caption=_("delete_confirm").format(html.escape(dict_result['title']),
+                                                                  html.escape(dict_result['description'])),
                                parse_mode="HTML", reply_markup=InlineKeyboardMarkup(menu_opt))
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("error_video_not_found"))

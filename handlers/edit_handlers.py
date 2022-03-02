@@ -1,6 +1,8 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
+import html
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaVideo
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
@@ -69,9 +71,9 @@ def edit_get_id(update, context):
     context.bot.send_video(chat_id=update.effective_chat.id,
                            video=context.user_data['edit']['file_id'],
                            caption=_("video_info").format(context.user_data['edit']['id'],
-                                                          context.user_data['edit']['title'],
-                                                          context.user_data['edit']['description'],
-                                                          context.user_data['edit']['keywords']),
+                                                          html.escape(context.user_data['edit']['title']),
+                                                          html.escape(context.user_data['edit']['description']),
+                                                          html.escape(context.user_data['edit']['keywords'])),
                            parse_mode="HTML")
 
     menu_opt = [[InlineKeyboardButton(_("video"), callback_data='video'),
@@ -143,9 +145,9 @@ def edit_desc(update, context):
                 context.bot.edit_message_caption(
                     chat_id=context.user_data['edit']['chat_id'], message_id=context.user_data['edit']['msg_id'],
                     caption=_("channel_info_caption").format(context.user_data['edit']['id'],
-                                                             context.user_data['edit']['user_name'],
-                                                             context.user_data['edit']['description'],
-                                                             context.user_data['edit']['keywords']),
+                                                             html.escape(context.user_data['edit']['user_name']),
+                                                             html.escape(context.user_data['edit']['description']),
+                                                             html.escape(context.user_data['edit']['keywords'])),
                     parse_mode="HTML")
         else:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
@@ -170,9 +172,9 @@ def edit_keywords(update, context):
                 context.bot.edit_message_caption(
                     chat_id=context.user_data['edit']['chat_id'], message_id=context.user_data['edit']['msg_id'],
                     caption=_("channel_info_caption").format(context.user_data['edit']['id'],
-                                                             context.user_data['edit']['user_name'],
-                                                             context.user_data['edit']['description'],
-                                                             context.user_data['edit']['keywords']),
+                                                             html.escape(context.user_data['edit']['user_name']),
+                                                             html.escape(context.user_data['edit']['description']),
+                                                             html.escape(context.user_data['edit']['keywords'])),
                     parse_mode="HTML")
         else:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
@@ -209,10 +211,11 @@ def edit_video(update, context):
                         chat_id=context.user_data['edit']['chat_id'], message_id=context.user_data['edit']['msg_id'],
                         media=InputMediaVideo(
                             update['message']['video']['file_id'],
-                            caption=_("channel_info_caption").format(context.user_data['edit']['id'],
-                                                                     context.user_data['edit']['user_name'],
-                                                                     context.user_data['edit']['description'],
-                                                                     context.user_data['edit']['keywords']),
+                            caption=_("channel_info_caption").format(
+                                context.user_data['edit']['id'],
+                                html.escape(context.user_data['edit']['user_name']),
+                                html.escape(context.user_data['edit']['description']),
+                                html.escape(context.user_data['edit']['keywords'])),
                             parse_mode="HTML"))
             else:
                 context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))

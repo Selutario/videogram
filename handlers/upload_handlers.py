@@ -1,6 +1,7 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
+import html
 from uuid import uuid4
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -104,9 +105,9 @@ def upld_keywords(update, context):
         video_msg = context.bot.send_video(
             chat_id=settings['channel_id'], video=context.user_data['upld']['file_id'],
             caption=_("channel_info_caption").format(context.user_data['upld']['id'],
-                                                     user,
-                                                     context.user_data['upld']['desc'],
-                                                     context.user_data['upld']['keywords']),
+                                                     html.escape(user),
+                                                     html.escape(context.user_data['upld']['desc']),
+                                                     html.escape(context.user_data['upld']['keywords'])),
             parse_mode="HTML")
 
         query = "INSERT INTO video_data (id, title, description, keywords, file_id, file_unique_id, width, height, " \
