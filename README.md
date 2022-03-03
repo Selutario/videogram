@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/23361101/156667790-cfc67d41-c7fb-4ad9-9286-ee25c1d82990.png" alt="Videogram" height="200"/>
+  <img src="https://user-images.githubusercontent.com/23361101/156668909-02ef8410-d8ed-4fac-b354-75facb9f84d0.png" alt="Videogram" height="200"/>
 </p>
 
 
 ## Description
-Telegram bot to search and send videos in any chat (inline, like @gif). Users can upload/edit/delete their own videos.
+Telegram bot to search and send videos in any chat (inline, like [@gif](https://telegram.me/gif)). Users can upload/edit/delete their own videos.
 
 ## How to install
 1. Get a Telegram API key at [@BotFather](https://t.me/botfather) via Telegram:
