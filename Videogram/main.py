@@ -3,7 +3,7 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
-from pathlib import Path
+import os
 
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, ChosenInlineResultHandler
 
@@ -11,13 +11,12 @@ from handlers import common_handlers, search_handlers
 from handlers.delete_handlers import delete_conv_handler
 from handlers.edit_handlers import edit_conv_handler
 from handlers.upload_handlers import upload_conv_handler
-from utils.common import settings
 
 
 def main():
     # Start bot
     try:
-        updater = Updater(token=Path(settings['token_path']).read_text().rstrip(), use_context=True)
+        updater = Updater(token=os.environ['TOKEN'], use_context=True)
     except Exception as e:
         print("Could not access token. Did you run the 'installer.py' first?")
         exit(1)
