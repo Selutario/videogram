@@ -1,17 +1,27 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
+import os
 import re
 import string
-from datetime import datetime, timezone
 from sqlite3 import connect, Row, Error
 
 from numpy import dot
 from numpy.linalg import norm
 from pandas import DataFrame
+from ruamel.yaml import YAML
 from sklearn.feature_extraction.text import TfidfVectorizer
+from videogram.utils.common import DB_PATH, SCHEMA_PATH, SETTINGS_PATH, settings
 
-from utils.common import *
+yaml = YAML()
+
+def initialized():
+    return settings['bot_name'] and settings['admin_usernames'] and settings['channel_id']
+
+def store_settings(field, value):
+    settings[field] = value
+    with open(SETTINGS_PATH, 'w') as f:
+        yaml.dump(settings, f)
 
 
 def execute_query(query, parameters=None):
@@ -155,5 +165,11 @@ class VideosInfo:
     def __len__(self):
         return len(self.videos_info_list)
 
+if not os.path.exists(DB_PATH):
+    with open(SCHEMA_PATH, 'r') as f:
+        with connect(DB_PATH) as connection:
+            cursor = connection.cursor()
+            sql_as_string = f.read()
+            cursor.executescript(sql_as_string)
 
 videos_info = VideosInfo()

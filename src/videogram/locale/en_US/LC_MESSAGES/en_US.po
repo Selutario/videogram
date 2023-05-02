@@ -39,7 +39,7 @@ msgid "error_desc_length"
 msgstr "You have exceeded the maximum length ({0}/{1} characters). Please, send me a shorter description."
 
 msgid "error_keywords_length"
-msgstr "You have exceeded the maximum length ({0}/{1} characters). Please, send me less keywors."
+msgstr "You have exceeded the maximum length ({0}/{1} characters). Please, send me less keywords."
 
 msgid "channel_info_caption"
 msgstr "<b>ID:</b> <code>{0}</code>\n"
@@ -55,6 +55,15 @@ msgstr "<b>ID:</b> <code>{0}</code>\n"
 
 
 # common_handlers.py
+msgid "init_required"
+msgstr "Please add the bot to a channel to initialize it first."
+
+msgid "init_success"
+msgstr "The bot was successfully initialized. Now you can start uploading videos! 🎉"
+
+msgid "init_error"
+msgstr "There was an error initializing the bot: {0}"
+
 msgid "start_command"
 msgstr "Hey. Write @{0} followed by some text to search for a video. For example: @{0} hello"
 

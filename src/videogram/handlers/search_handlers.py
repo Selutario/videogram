@@ -6,9 +6,8 @@ from datetime import datetime, timezone
 
 from telegram import InlineQueryResultCachedVideo
 
-from utils import utils
-from utils.common import settings, results_limit, empty_query_videos
-
+from videogram.utils import utils
+from videogram.utils.common import settings, results_limit, empty_query_videos
 
 def inline_search(update, context):
     query = update.inline_query.query

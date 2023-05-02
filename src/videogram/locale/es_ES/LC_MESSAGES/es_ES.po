@@ -41,20 +41,29 @@ msgstr "Has superado la longitud máxima ({0}/{1} caracteres). Por favor, envía
 msgid "error_keywords_length"
 msgstr "Has superado la longitud máxima ({0}/{1} caracteres). Por favor, envíame menos palabras clave."
 
-msgid "channel_info_caption"
-msgstr "<b>ID:</b> <code>{0}</code>\n"
-"<b>Usuario:</b> <code>{1}</code>\n"
-"<b>Descripción:</b> <code>{2}</code>\n"
-"<b>Keywords:</b> <code>{3}</code>"
-
 msgid "video_info"
 msgstr "<b>ID:</b> <code>{0}</code>\n"
 "<b>Título:</b> <code>{1}</code>\n"
 "<b>Descripción:</b> <code>{2}</code>\n"
 "<b>Keywords:</b> <code>{3}</code>"
 
+msgid "channel_info_caption"
+msgstr "<b>ID:</b> <code>{0}</code>\n"
+"<b>Usuario:</b> <code>{1}</code>\n"
+"<b>Descripción:</b> <code>{2}</code>\n"
+"<b>Keywords:</b> <code>{3}</code>"
+
 
 # common_handlers.py
+msgid "init_required"
+msgstr "Debes añadir el bot a un canal para inicializarlo."
+
+msgid "init_success"
+msgstr "El bot fue correctamente inicializado. ¡Ya puedes empezar a subir vídeos! 🎉"
+
+msgid "init_error"
+msgstr "Ha habido un error al inicializar el bot: {0}"
+
 msgid "start_command"
 msgstr "Ey. Escribe @{0} junto a un texto para buscar un video. P. ej: @{0} hola"
 

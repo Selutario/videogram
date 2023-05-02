@@ -6,15 +6,18 @@ import html
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaVideo
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
-from handlers.common_handlers import cancel
-from utils import utils
-from utils.common import settings
+from videogram.handlers.common_handlers import cancel
+from videogram.utils import utils
+from videogram.utils.common import settings
 
 EDIT_GET_ID, EDIT_MENU, EDIT_CHOSEN_OPTION, EDIT_TITLE, EDIT_DESC, EDIT_KEYWORDS, EDIT_VIDEO = range(7)
 
 
 def edit_start(update, context):
-    if (update.effective_user.username in settings['admin_usernames'] or
+    if not utils.initialized():
+        context.bot.send_message(chat_id=update.effective_chat.id, text=_("init_required"))
+        return ConversationHandler.END
+    elif (update.effective_user.username in settings['admin_usernames'] or
             (settings['edit_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
              (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_start"))

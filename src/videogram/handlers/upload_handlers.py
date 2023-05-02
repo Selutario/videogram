@@ -7,15 +7,18 @@ from uuid import uuid4
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, CommandHandler, Filters, MessageHandler, CallbackQueryHandler
 
-from handlers.common_handlers import cancel
-from utils import utils
-from utils.common import settings, INVALID_MIME_TYPES
+from videogram.handlers.common_handlers import cancel
+from videogram.utils import utils
+from videogram.utils.common import settings, INVALID_MIME_TYPES
+
 
 UPLD_GET_VID, UPLD_TITLE, UPLD_DESC, UPLD_KEYWORDS, UPLD_CHECK_SAME = range(5)
 
-
 def upld_start(update, context):
-    if (update.effective_user.username in settings['admin_usernames'] or
+    if not utils.initialized():
+        context.bot.send_message(chat_id=update.effective_chat.id, text=_("init_required"))
+        return ConversationHandler.END
+    elif (update.effective_user.username in settings['admin_usernames'] or
             (settings['upload_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
              (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("upld_send_video"))

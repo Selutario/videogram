@@ -1,9 +1,13 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
-from os.path import join, dirname, abspath
-from yaml import safe_load
 import gettext
+from os.path import join, dirname, abspath
+
+from ruamel.yaml import YAML
+
+yaml = YAML()
+
 
 BOT_PATH = dirname(dirname(abspath(__file__)))
 DATA_PATH = join(BOT_PATH, 'data')
@@ -14,7 +18,7 @@ LOGS_PATH = join(DATA_PATH, 'bot.log')
 SETTINGS_PATH = join(DATA_PATH, 'settings.yaml')
 
 with open(SETTINGS_PATH, 'r') as f:
-    settings = safe_load(f)
+    settings = yaml.load(f)
 
 results_limit = min(settings['results_limit'], 50)
 empty_query_videos = min(settings['empty_query_videos'], 50)

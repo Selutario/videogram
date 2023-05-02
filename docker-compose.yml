@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+    videogram:
+        image: bot-videogram
+        hostname: videogram
+        environment:
+            - TOKEN=${VIDEOGRAM_TOKEN}
+        build:
+            context: ./
+        restart: always
+        volumes:
+            - ./src/videogram/data:/usr/local/lib/python3.8/dist-packages/videogram/data

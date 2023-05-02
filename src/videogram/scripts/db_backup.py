@@ -6,9 +6,7 @@ from pathlib import Path
 
 from telegram import Bot
 
-from utils.common import settings
-from utils.utils import DB_PATH
-
+from videogram.utils.common import settings, DB_PATH
 
 def send_backup():
     bot = Bot(token=Path(settings['token_path']).read_text().rstrip())
