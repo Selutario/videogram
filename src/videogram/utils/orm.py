@@ -99,7 +99,7 @@ class SentVideos(Base):
         self.query = query
         self.user_id = user_id
         self.video_id = video_id
-        self.date = date or datetime.datetime.now(datetime.timezone.utc)
+        self.date = date or datetime.datetime.utcnow()
 
     def __repr__(self):
         return f'SentVideo({self.id}, {self.query})'
@@ -141,7 +141,6 @@ class Users(Base):
     last_name = Column(Text)
 
     def __init__(self, user_id: str, user_name: str = '', first_name: str = '', last_name: str = ''):
-
             """Class constructor.
 
             Parameters

@@ -38,5 +38,8 @@ backup_user_id: 0
 # You can add new languages in locale/ folder
 language: en_US
 
+# Timezone (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+timezone: UTC
+
 # Enable debug logs
 logs_debug: false

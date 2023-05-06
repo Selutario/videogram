@@ -73,6 +73,14 @@ msgstr "Don't invent, please..."
 msgid "cancel_command"
 msgstr "Cancelling... ❌"
 
+msgid "get_sent_videos"
+msgstr "<b>ID:</b> {0}\n"
+"<b>User:</b> <code>{1}</code>\n"
+"<b>Name:</b> {2}\n"
+"<b>Date:</b> {3}\n"
+"<b>Input:</b> <code>{4}</code>\n"
+"<b>Title:</b> <code>{5}</code>"
+
 
 # delete_handlers.py
 msgid "delete_start"

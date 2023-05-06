@@ -3,8 +3,10 @@
 
 import html
 import logging
+from zoneinfo import ZoneInfo
 
 import videogram.utils.orm as orm
+from dateutil import tz
 from telegram.ext import ConversationHandler
 from videogram.utils import utils
 from videogram.utils.common import settings, LOGS_PATH
@@ -70,13 +72,17 @@ def get_sent_videos(update, context):
 
         for sent_video, user, video_data in reversed(sent_videos):
             try:
-                context.bot.send_message(chat_id=update.effective_chat.id,
-                                         text=f"<b>ID:</b> {sent_video.id}\n"
-                                              f"<b>Username:</b> <code>{user.user_name}</code>\n"
-                                              f"<b>Name:</b> {html.escape(user.first_name)}\n"
-                                              f"<b>Date:</b> {sent_video.date}\n"
-                                              f"<b>Query:</b> <code>{html.escape(sent_video.query)}</code>\n"
-                                              f"<b>Title:</b> {html.escape(video_data.title)}\n", parse_mode="HTML")
+                date = sent_video.date.replace(tzinfo=ZoneInfo('UTC')).astimezone(
+                    tz.gettz(settings['timezone'])).strftime('%H:%M (%d/%m/%Y)')
 
+                context.bot.send_message(chat_id=update.effective_chat.id,
+                                         text=_("get_sent_videos").format(
+                                             sent_video.id,
+                                             user.user_name,
+                                             html.escape(user.first_name),
+                                             date,
+                                             html.escape(sent_video.query),
+                                             html.escape(video_data.title)),
+                                         parse_mode="HTML")
             except Exception as e:
                 print(f"Error: {sent_videos} | {e}")

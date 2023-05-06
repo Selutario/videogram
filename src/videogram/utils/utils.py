@@ -58,7 +58,7 @@ def create_df(documents):
     vt = TfidfVectorizer()  # It fits the data and transform it as a vector
     x = vt.fit_transform(documents)  # Convert the X as transposed matrix
     x = x.T.toarray()  # Create a DataFrame and set the vocabulary as the index
-    return DataFrame(x, index=vt.get_feature_names()), vt
+    return DataFrame(x, index=vt.get_feature_names_out()), vt
 
 
 def get_similar_videos(q, df, vt, n_videos, sensitivity=settings['sensitivity']):
