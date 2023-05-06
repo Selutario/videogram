@@ -8,7 +8,6 @@ from ruamel.yaml import YAML
 
 yaml = YAML()
 
-
 BOT_PATH = dirname(dirname(abspath(__file__)))
 DATA_PATH = join(BOT_PATH, 'data')
 SCHEMA_PATH = join(DATA_PATH, 'schema_db.sql')

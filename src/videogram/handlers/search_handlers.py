@@ -9,7 +9,7 @@ from videogram.utils import utils
 from videogram.utils.common import settings, results_limit, empty_query_videos
 
 
-def inline_search(update, context):
+async def inline_search(update, context):
     query = update.inline_query.query
     inline_results = []
 
@@ -38,10 +38,10 @@ def inline_search(update, context):
                                              title=utils.videos_info.videos_info_list[idx].title,
                                              description=utils.videos_info.videos_info_list[idx].description))
 
-        context.bot.answer_inline_query(update.inline_query.id, inline_results)
+        await context.bot.answer_inline_query(update.inline_query.id, inline_results)
 
 
-def on_chosen_video(update, context):
+async def on_chosen_video(update, context):
     user = orm.Users(
         user_id=update.effective_user.id,
         user_name=update.effective_user.username,

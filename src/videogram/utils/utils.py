@@ -26,9 +26,9 @@ def store_settings(field, value):
 
 
 def cleaner(query):
-    document_test = query.replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u')\
-        .replace('ñ', 'n').replace('ü', 'u').replace('1', 'one').replace('2', 'two').replace('3', 'three').\
-        replace('4', 'four').replace('5', 'five').replace('6', 'six').replace('7', 'seven').replace('8', 'eight').\
+    document_test = query.replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u') \
+        .replace('ñ', 'n').replace('ü', 'u').replace('1', 'one').replace('2', 'two').replace('3', 'three'). \
+        replace('4', 'four').replace('5', 'five').replace('6', 'six').replace('7', 'seven').replace('8', 'eight'). \
         replace('9', 'nine').replace('0', 'zero')
     # Remove Unicode
     document_test = re.sub(r'[^\x00-\x7F]+', ' ', document_test)
@@ -75,7 +75,7 @@ def get_similar_videos(q, df, vt, n_videos, sensitivity=settings['sensitivity'])
                 pass
 
         # Sort the values
-        sim_sorted = sorted(sim.items(), key=lambda x: x[1], reverse=True)  # Print the articles and their similarity values
+        sim_sorted = sorted(sim.items(), key=lambda x: x[1], reverse=True)
         for k, v in sim_sorted:
             if v > sensitivity:
                 result.append(k)
@@ -113,7 +113,6 @@ class VideosInfo:
 
             self.desc_df, self.desc_vt = create_df(self.desc_list)
             self.desc_kwds_df, self.desc_kwds_vt = create_df(self.desc_kwds_list)
-
 
     def __len__(self):
         return len(self.videos_info_list)

@@ -54,7 +54,7 @@ setup(
         "babel==2.12.1",
         "SQLAlchemy==2.0.12",
         "numpy==1.24.3",
-        "python-telegram-bot==13.7",
+        "python-telegram-bot==20.2",
         "cython==0.29.21",
         "pandas==2.0.1",
         "joblib==1.2.0",

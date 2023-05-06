@@ -10,7 +10,7 @@ from videogram.utils.common import DB_PATH
 
 Base = declarative_base()
 
-engine = create_engine(f'sqlite:////{DB_PATH}')
+engine = create_engine(f'sqlite:///{DB_PATH}')
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -141,23 +141,23 @@ class Users(Base):
     last_name = Column(Text)
 
     def __init__(self, user_id: str, user_name: str = '', first_name: str = '', last_name: str = ''):
-            """Class constructor.
+        """Class constructor.
 
-            Parameters
-            ----------
-            user_id : str
-                Telegram user ID of the user.
-            user_name : str
-                Telegram username of the user.
-            first_name : str
-                Telegram first name of the user.
-            last_name : str
-                Telegram last name of the user.
-            """
-            self.id = user_id
-            self.user_name = user_name
-            self.first_name = first_name
-            self.last_name = last_name
+        Parameters
+        ----------
+        user_id : str
+            Telegram user ID of the user.
+        user_name : str
+            Telegram username of the user.
+        first_name : str
+            Telegram first name of the user.
+        last_name : str
+            Telegram last name of the user.
+        """
+        self.id = user_id
+        self.user_name = user_name
+        self.first_name = first_name
+        self.last_name = last_name
 
     def __repr__(self):
         return f'User({self.id}, {self.first_name})'
