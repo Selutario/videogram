@@ -16,17 +16,15 @@ def main():
     # Start bot
     try:
         updater = Updater(token=os.environ['TOKEN'], use_context=True)
+        dp = updater.dispatcher
     except Exception as e:
         print(f'Could not find the bot token. Please set the environment variable "TOKEN": {e}')
         exit(1)
-
-    dp = updater.dispatcher
 
     dp.add_handler(ChatMemberHandler(common_handlers.init, 'MY_CHAT_MEMBER'))
 
     # Common commands - answer in Telegram
     dp.add_handler(CommandHandler("start", common_handlers.start))
-    dp.add_handler(CommandHandler("random", common_handlers.get_random_video))
     dp.add_handler(CommandHandler("sent_videos", common_handlers.get_sent_videos))
 
     # Conversation handlers

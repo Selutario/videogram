@@ -3,9 +3,9 @@
 
 import html
 
+import videogram.utils.orm as orm
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, MessageHandler, CommandHandler, Filters, CallbackQueryHandler
-
 from videogram.handlers.common_handlers import cancel
 from videogram.utils import utils
 from videogram.utils.common import *
@@ -28,41 +28,32 @@ def delete_start(update, context):
 
 
 def delete_get_id(update, context):
-    common_query = """
-    SELECT video_data.id, video_data.title, video_data.description, video_data.file_id, channel_messages.msg_id, 
-    channel_messages.chat_id, video_data.user_id FROM video_data LEFT JOIN channel_messages ON 
-    video_data.id=channel_messages.video_id WHERE 
-    """
-
     if update['message']['video']:
-        result = utils.execute_read_query(query=common_query+"video_data.file_unique_id = ?",
-                                          parameters=(update['message']['video']['file_unique_id'],))
+        result = orm.session.query(orm.VideoData, orm.ChannelMessages).join(orm.ChannelMessages, isouter=True).filter(
+            orm.VideoData.file_unique_id == update['message']['video']['file_unique_id']).first()
     elif update['message']['text']:
-        result = utils.execute_read_query(query=common_query+"video_data.id = ?",
-                                          parameters=(update['message']['text'],))
+        result = orm.session.query(orm.VideoData, orm.ChannelMessages).join(orm.ChannelMessages, isouter=True).filter(
+            orm.VideoData.id == update['message']['text']).first()
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("need_video_or_id"))
         return
 
     if result:
-        dict_result = dict(result[0])
         context.user_data.update({
-            'delete': {
-                'id': dict_result['id'],
-                'chat_id': dict_result['chat_id'],
-                'msg_id': dict_result['msg_id']
-            }
+            'video': result[0],
+            'channel_message': result[1]
         })
-        if str(update.effective_user.id) != dict_result['user_id'] and \
+
+        if str(update.effective_user.id) != context.user_data['video'].user_id and \
                 str(update.effective_user.username) not in settings['admin_usernames']:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("delete_no_permissions"))
             return ConversationHandler.END
 
         menu_opt = [[InlineKeyboardButton('✅', callback_data='yes'),
                      InlineKeyboardButton('❌', callback_data='no')]]
-        context.bot.send_video(chat_id=update.effective_chat.id, video=dict_result['file_id'],
-                               caption=_("delete_confirm").format(html.escape(dict_result['title']),
-                                                                  html.escape(dict_result['description'])),
+        context.bot.send_video(chat_id=update.effective_chat.id, video=context.user_data['video'].file_id,
+                               caption=_("delete_confirm").format(html.escape(context.user_data['video'].title),
+                                                                  html.escape(context.user_data['video'].description)),
                                parse_mode="HTML", reply_markup=InlineKeyboardMarkup(menu_opt))
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("error_video_not_found"))
@@ -73,15 +64,19 @@ def delete_get_id(update, context):
 def on_chosen_delete_option(update, context):
     update.callback_query.answer()
     if update.callback_query.data == 'yes':
-        if utils.execute_query(query="DELETE FROM video_data WHERE id = ?",
-                               parameters=(context.user_data['delete']['id'],)):
-            utils.videos_info.update_model()
-            if context.user_data['delete']['msg_id']:
-                context.bot.delete_message(chat_id=context.user_data['delete']['chat_id'],
-                                           message_id=context.user_data['delete']['msg_id'])
+        try:
+            orm.session.delete(context.user_data['video'])
+            orm.session.delete(context.user_data['channel_message'])
+
+            if context.user_data['channel_message'].msg_id:
+                context.bot.delete_message(chat_id=context.user_data['channel_message'].chat_id,
+                                           message_id=context.user_data['channel_message'].msg_id)
+
+            orm.session.commit()
             update.callback_query.edit_message_caption(_("delete_ok"))
-        else:
+        except Exception:
             update.callback_query.edit_message_caption(_("error"))
+
     elif update.callback_query.data == 'no':
         update.callback_query.edit_message_caption(_("cancel_command"))
     else:

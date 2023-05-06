@@ -3,11 +3,9 @@
 
 import html
 import logging
-from datetime import datetime, timezone
-from random import choice
 
+import videogram.utils.orm as orm
 from telegram.ext import ConversationHandler
-
 from videogram.utils import utils
 from videogram.utils.common import settings, LOGS_PATH
 
@@ -54,42 +52,31 @@ def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
-def get_random_video(update, context):
-    if not (update.effective_user.username in settings['admin_usernames'] or not settings['closed_circle'] or
-            update.effective_user.username in settings['closed_circle']):
-        return
-
-    random_result = choice(utils.videos_info.videos_info_list)
-
-    query = "INSERT INTO sent_random (video_id, title, user_id, date) VALUES (?, ?, ?, ?)"
-    params = (random_result['id'], random_result['title'], update.effective_user.id, datetime.now(timezone.utc))
-    if not utils.execute_query(query, params):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
-
-    context.bot.send_video(chat_id=update.effective_chat.id, video=random_result['file_id'])
-
 
 def get_sent_videos(update, context):
     if update.effective_user.username in settings['admin_usernames']:
-        query = "select sent_videos.id, sent_videos.query, sent_videos.date, sent_videos.user_id, users.user_name, " \
-                "users.first_name, video_data.title FROM sent_videos JOIN users ON sent_videos.user_id=users.id " \
-                "JOIN video_data ON sent_videos.video_id=video_data.id ORDER BY sent_videos.id DESC LIMIT ?;"
         try:
             parameters = int(context.args[0])
         except IndexError:
             parameters = 2
 
-        for row in reversed(utils.execute_read_query(query=query, parameters=(parameters,))):
-            try:
-                result = dict(row)
+        try:
+            sent_videos = orm.session.query(orm.SentVideos, orm.Users, orm.VideoData).filter(
+                orm.SentVideos.user_id == orm.Users.id, orm.VideoData.id == orm.SentVideos.video_id).order_by(
+                orm.SentVideos.id.desc()).limit(parameters).all()
+        except Exception as e:
+            print(e)
+            return
 
+        for sent_video, user, video_data in reversed(sent_videos):
+            try:
                 context.bot.send_message(chat_id=update.effective_chat.id,
-                                         text=f"<b>ID:</b> {result['id']}\n"
-                                              f"<b>Username:</b> <code>{result['user_name']}</code>\n"
-                                              f"<b>Name:</b> {html.escape(result['first_name'])}\n"
-                                              f"<b>Date:</b> {result['date']}\n"
-                                              f"<b>Query:</b> <code>{html.escape(result['query'])}</code>\n"
-                                              f"<b>Title:</b> {html.escape(result['title'])}\n", parse_mode="HTML")
+                                         text=f"<b>ID:</b> {sent_video.id}\n"
+                                              f"<b>Username:</b> <code>{user.user_name}</code>\n"
+                                              f"<b>Name:</b> {html.escape(user.first_name)}\n"
+                                              f"<b>Date:</b> {sent_video.date}\n"
+                                              f"<b>Query:</b> <code>{html.escape(sent_video.query)}</code>\n"
+                                              f"<b>Title:</b> {html.escape(video_data.title)}\n", parse_mode="HTML")
 
             except Exception as e:
-                print(f"Error: {result} | {e}")
+                print(f"Error: {sent_videos} | {e}")

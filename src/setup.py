@@ -3,7 +3,6 @@ from setuptools.command.install import install
 
 package_data_list = [
     "data/settings.yaml",
-    "data/schema_db.sql",
     "locale/*/*/*.po"
 ]
 

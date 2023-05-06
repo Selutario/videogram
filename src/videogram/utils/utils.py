@@ -1,53 +1,28 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
-import os
 import re
 import string
-from sqlite3 import connect, Row, Error
 
+import videogram.utils.orm as orm
 from numpy import dot
 from numpy.linalg import norm
 from pandas import DataFrame
 from ruamel.yaml import YAML
 from sklearn.feature_extraction.text import TfidfVectorizer
-from videogram.utils.common import DB_PATH, SCHEMA_PATH, SETTINGS_PATH, settings
+from videogram.utils.common import SETTINGS_PATH, settings
 
 yaml = YAML()
 
+
 def initialized():
     return settings['bot_name'] and settings['admin_usernames'] and settings['channel_id']
+
 
 def store_settings(field, value):
     settings[field] = value
     with open(SETTINGS_PATH, 'w') as f:
         yaml.dump(settings, f)
-
-
-def execute_query(query, parameters=None):
-    with connect(DB_PATH) as connection:
-        connection.row_factory = Row
-        cursor = connection.cursor()
-        cursor.execute("PRAGMA foreign_keys = ON")
-
-        try:
-            cursor.execute(query, parameters) if parameters else cursor.execute(query)
-            connection.commit()
-            return True
-        except Error as e:
-            return False
-
-
-def execute_read_query(query, parameters=None):
-    with connect(DB_PATH) as connection:
-        connection.row_factory = Row
-        cursor = connection.cursor()
-        try:
-            cursor.execute(query, parameters) if parameters else cursor.execute(query)
-            result = cursor.fetchall()
-            return result
-        except Error as e:
-            print(f"The error '{e}' occurred")
 
 
 def cleaner(query):
@@ -89,7 +64,7 @@ def create_df(documents):
 def get_similar_videos(q, df, vt, n_videos, sensitivity=settings['sensitivity']):
     if n_videos:
         q = [q]
-        result = list()
+        result = []
         q_vec = vt.transform(q).toarray().reshape(df.shape[0], )
         sim = {}  # Calculate the similarity
 
@@ -107,69 +82,41 @@ def get_similar_videos(q, df, vt, n_videos, sensitivity=settings['sensitivity'])
         return result
 
 
-def store_user_details(update):
-    """Save user data (name, username and chat id if not in a group).
-
-    Parameters
-    ----------
-    update : telegram.update.Update
-        Object representing incoming update with request data.
-
-    Returns
-    -------
-    bool
-        SQL query result.
-    """
-
-    query = "INSERT OR IGNORE INTO users (id, user_name, first_name, last_name) VALUES(?, ?, ?, ?)"
-    params = (update.effective_user.id, update.effective_user.username, update.effective_user.first_name,
-              update.effective_user.last_name)
-
-    return execute_query(query, params)
-
-
 class VideosInfo:
     def __init__(self):
         # Full video items from the DB
-        self.videos_info_list = list()
+        self.videos_info_list = []
 
         # Description field
-        self.desc_list = list()
+        self.desc_list = []
         self.desc_df = None
         self.desc_vt = None
 
         # Description + keywords fields
-        self.desc_kwds_list = list()
+        self.desc_kwds_list = []
         self.desc_kwds_df = None
         self.desc_kwds_vt = None
 
         self.update_model()
 
     def update_model(self):
-        db_result = execute_read_query('select id, title, description, file_id, keywords from video_data')
+        videos = orm.session.query(orm.VideoData).all()
 
-        if db_result:
-            self.videos_info_list = list()
-            self.desc_list = list()
-            self.desc_kwds_list = list()
+        if videos:
+            self.videos_info_list = videos
+            self.desc_list = []
+            self.desc_kwds_list = []
 
-            for row in db_result:
-                row_dict = dict(row)
-                self.videos_info_list.append(row_dict)
-                self.desc_list.append(cleaner(row_dict['description']))
-                self.desc_kwds_list.append(cleaner(row_dict['description'] + ' ' + row_dict['keywords']))
+            for video in videos:
+                self.desc_list.append(cleaner(video.description))
+                self.desc_kwds_list.append(cleaner(video.description + ' ' + video.keywords))
 
             self.desc_df, self.desc_vt = create_df(self.desc_list)
             self.desc_kwds_df, self.desc_kwds_vt = create_df(self.desc_kwds_list)
 
+
     def __len__(self):
         return len(self.videos_info_list)
 
-if not os.path.exists(DB_PATH):
-    with open(SCHEMA_PATH, 'r') as f:
-        with connect(DB_PATH) as connection:
-            cursor = connection.cursor()
-            sql_as_string = f.read()
-            cursor.executescript(sql_as_string)
 
 videos_info = VideosInfo()

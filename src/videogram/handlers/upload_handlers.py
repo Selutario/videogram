@@ -4,15 +4,15 @@
 import html
 from uuid import uuid4
 
+import videogram.utils.orm as orm
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, CommandHandler, Filters, MessageHandler, CallbackQueryHandler
-
 from videogram.handlers.common_handlers import cancel
 from videogram.utils import utils
 from videogram.utils.common import settings, INVALID_MIME_TYPES
 
-
 UPLD_GET_VID, UPLD_TITLE, UPLD_DESC, UPLD_KEYWORDS, UPLD_CHECK_SAME = range(5)
+
 
 def upld_start(update, context):
     if not utils.initialized():
@@ -113,26 +113,47 @@ def upld_keywords(update, context):
                                                      html.escape(context.user_data['upld']['keywords'])),
             parse_mode="HTML")
 
-        query = "INSERT INTO video_data (id, title, description, keywords, file_id, file_unique_id, width, height, " \
-                "duration, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        params = (context.user_data['upld']['id'], context.user_data['upld']['title'],
-                  context.user_data['upld']['desc'], context.user_data['upld']['keywords'],
-                  video_msg['video']['file_id'], video_msg['video']['file_unique_id'], video_msg['video']['width'],
-                  video_msg['video']['height'], video_msg['video']['duration'], context.user_data['upld']['user_id'])
+        try:
+            user = orm.Users(
+                user_id=update.effective_user.id,
+                user_name=update.effective_user.username,
+                first_name=update.effective_user.first_name,
+                last_name=update.effective_user.last_name
+            )
+            orm.session.merge(user)
 
-        if not utils.store_user_details(update) or not utils.execute_query(query, params):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
-            return ConversationHandler.END
 
-        query = "INSERT INTO channel_messages (msg_id, chat_id, video_id) VALUES (?, ?, ?)"
-        params = (video_msg['message_id'], video_msg['chat']['id'], context.user_data['upld']['id'])
-        if utils.execute_query(query, params):
+            video = orm.VideoData(
+                video_id=context.user_data['upld']['id'],
+                title=context.user_data['upld']['title'],
+                description=context.user_data['upld']['desc'],
+                keywords=context.user_data['upld']['keywords'],
+                file_id=video_msg['video']['file_id'],
+                file_unique_id=video_msg['video']['file_unique_id'],
+                width=video_msg['video']['width'],
+                height=video_msg['video']['height'],
+                duration=video_msg['video']['duration'],
+                user_id=context.user_data['upld']['user_id']
+            )
+            orm.session.add(video)
+
+            channel_message = orm.ChannelMessages(
+                msg_id=video_msg['message_id'],
+                chat_id=video_msg['chat']['id'],
+                video_id=context.user_data['upld']['id']
+            )
+            orm.session.add(channel_message)
+            orm.session.commit()
+
             utils.videos_info.update_model()
             context.bot.send_message(
                 chat_id=update.effective_chat.id, text=_("upld_video_ok").format(context.user_data['upld']['id']),
                 parse_mode="HTML")
-        else:
+
+        except Exception:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+            return ConversationHandler.END
+
         return ConversationHandler.END
     else:
         context.bot.send_message(

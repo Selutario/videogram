@@ -3,12 +3,12 @@
 
 import html
 
+import videogram.utils.orm as orm
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaVideo
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
-
 from videogram.handlers.common_handlers import cancel
 from videogram.utils import utils
-from videogram.utils.common import settings
+from videogram.utils.common import settings, INVALID_MIME_TYPES
 
 EDIT_GET_ID, EDIT_MENU, EDIT_CHOSEN_OPTION, EDIT_TITLE, EDIT_DESC, EDIT_KEYWORDS, EDIT_VIDEO = range(7)
 
@@ -26,44 +26,27 @@ def edit_start(update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_disabled"))
         return ConversationHandler.END
 
-
 def edit_get_id(update, context):
-    common_query = """
-    SELECT video_data.id, video_data.title, video_data.description, video_data.keywords, video_data.file_id, 
-    video_data.user_id, channel_messages.msg_id, channel_messages.chat_id, users.id, users.user_name, users.first_name
-    FROM video_data LEFT JOIN channel_messages ON video_data.id=channel_messages.video_id LEFT JOIN users on
-    video_data.user_id=users.id WHERE 
-    """
-
     if update['message']['video']:
-        result = utils.execute_read_query(
-            query=common_query+"video_data.file_unique_id = ?",
-            parameters=(update['message']['video']['file_unique_id'],)
-        )
+        result = orm.session.query(orm.VideoData, orm.ChannelMessages, orm.Users).join(
+            orm.ChannelMessages, isouter=True).join(orm.Users, isouter=True).filter(
+            orm.VideoData.file_unique_id == update['message']['video']['file_unique_id']).first()
     elif update['message']['text']:
-        result = utils.execute_read_query(query=common_query+"video_data.id = ?", parameters=(update['message']['text'],))
+        result = orm.session.query(orm.VideoData, orm.ChannelMessages, orm.Users).join(
+            orm.ChannelMessages, isouter=True).join(orm.Users, isouter=True).filter(
+            orm.VideoData.id == update['message']['text']).first()
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=_("need_video_or_id"))
         return
 
     if result:
-        dict_result = dict(result[0])
-        context.user_data.update(
-            {
-                'edit': {
-                    'id': dict_result['id'],
-                    'title': dict_result['title'],
-                    'description': dict_result['description'],
-                    'keywords': dict_result['keywords'],
-                    'file_id': dict_result['file_id'],
-                    'user_id': dict_result['user_id'],
-                    'user_name': dict_result['user_name'] if dict_result['user_name'] else dict_result['user_name'],
-                    'msg_id': dict_result['msg_id'],
-                    'chat_id': dict_result['chat_id'],
-                }
-            }
-        )
-        if str(update.effective_user.id) != context.user_data['edit']['user_id'] and \
+        context.user_data.update({
+            'video': result[0],
+            'channel_message': result[1],
+            'user': result[2]
+        })
+
+        if str(update.effective_user.id) != context.user_data['user'].id and \
                 str(update.effective_user.username) not in settings['admin_usernames']:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_no_permissions"))
             return ConversationHandler.END
@@ -72,12 +55,13 @@ def edit_get_id(update, context):
         return ConversationHandler.END
 
     context.bot.send_video(chat_id=update.effective_chat.id,
-                           video=context.user_data['edit']['file_id'],
-                           caption=_("video_info").format(context.user_data['edit']['id'],
-                                                          html.escape(context.user_data['edit']['title']),
-                                                          html.escape(context.user_data['edit']['description']),
-                                                          html.escape(context.user_data['edit']['keywords'])),
+                           video=context.user_data['video'].file_id,
+                           caption=_("video_info").format(context.user_data['video'].id,
+                                                          html.escape(context.user_data['video'].title),
+                                                          html.escape(context.user_data['video'].description),
+                                                          html.escape(context.user_data['video'].keywords)),
                            parse_mode="HTML")
+
 
     menu_opt = [[InlineKeyboardButton(_("video"), callback_data='video'),
                 InlineKeyboardButton(_("title"), callback_data='title')],
@@ -120,12 +104,16 @@ def on_chosen_edit_option(update, context):
 
 def edit_title(update, context):
     if update['message']['text'] and len(update['message']['text']) <= settings["max_title_length"]:
-        if utils.execute_query(query="UPDATE video_data SET title = ? WHERE id = ?",
-                               parameters=(update['message']['text'], context.user_data['edit']['id'])):
+        try:
+            context.user_data['video'].title = update['message']['text']
+            orm.session.add(context.user_data['video'])
+            orm.session.commit()
+
             utils.videos_info.update_model()
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_title_ok"))
-        else:
+        except Exception:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+
         return ConversationHandler.END
     else:
         if not update['message']['text']:
@@ -138,22 +126,27 @@ def edit_title(update, context):
 
 def edit_desc(update, context):
     if update['message']['text'] and len(update['message']['text']) <= settings["max_desc_length"]:
-        context.user_data['edit'].update({'description': update['message']['text']})
-
-        if utils.execute_query(query="UPDATE video_data SET description = ? WHERE id = ?",
-                               parameters=(update['message']['text'], context.user_data['edit']['id'])):
+        try:
+            context.user_data['video'].description = update['message']['text']
+            orm.session.add(context.user_data['video'])
+            orm.session.commit()
             utils.videos_info.update_model()
-            context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_desc_ok"))
-            if context.user_data['edit']['msg_id']:
+
+            if context.user_data['channel_message'].msg_id:
                 context.bot.edit_message_caption(
-                    chat_id=context.user_data['edit']['chat_id'], message_id=context.user_data['edit']['msg_id'],
-                    caption=_("channel_info_caption").format(context.user_data['edit']['id'],
-                                                             html.escape(context.user_data['edit']['user_name']),
-                                                             html.escape(context.user_data['edit']['description']),
-                                                             html.escape(context.user_data['edit']['keywords'])),
+                    chat_id=context.user_data['channel_message'].chat_id,
+                    message_id=context.user_data['channel_message'].msg_id,
+                    caption=_("channel_info_caption").format(context.user_data['video'].id,
+                                                             html.escape(context.user_data['user'].user_name or
+                                                                         context.user_data['user'].last_name),
+                                                             html.escape(context.user_data['video'].description),
+                                                             html.escape(context.user_data['video'].keywords)),
                     parse_mode="HTML")
-        else:
+
+            context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_desc_ok"))
+        except Exception:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+
         return ConversationHandler.END
     else:
         if not update['message']['text']:
@@ -166,21 +159,27 @@ def edit_desc(update, context):
 
 def edit_keywords(update, context):
     if update['message']['text'] and len(update['message']['text']) <= settings["max_kwords_length"]:
-        context.user_data['edit'].update({'keywords': update['message']['text']})
-        if utils.execute_query(query="UPDATE video_data SET keywords = ? WHERE id = ?",
-                               parameters=(context.user_data['edit']['keywords'], context.user_data['edit']['id'])):
+        try:
+            context.user_data['video'].keywords = update['message']['text']
+            orm.session.add(context.user_data['video'])
+            orm.session.commit()
             utils.videos_info.update_model()
-            context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_keywords_ok"))
-            if context.user_data['edit']['msg_id']:
+
+            if context.user_data['channel_message'].msg_id:
                 context.bot.edit_message_caption(
-                    chat_id=context.user_data['edit']['chat_id'], message_id=context.user_data['edit']['msg_id'],
-                    caption=_("channel_info_caption").format(context.user_data['edit']['id'],
-                                                             html.escape(context.user_data['edit']['user_name']),
-                                                             html.escape(context.user_data['edit']['description']),
-                                                             html.escape(context.user_data['edit']['keywords'])),
+                    chat_id=context.user_data['channel_message'].chat_id,
+                    message_id=context.user_data['channel_message'].msg_id,
+                    caption=_("channel_info_caption").format(context.user_data['video'].id,
+                                                             html.escape(context.user_data['user'].user_name or
+                                                                         context.user_data['user'].last_name),
+                                                             html.escape(context.user_data['video'].description),
+                                                             html.escape(context.user_data['video'].keywords)),
                     parse_mode="HTML")
-        else:
+
+            context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_keywords_ok"))
+        except Exception:
             context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+
         return ConversationHandler.END
     else:
         if not update['message']['text']:
@@ -193,35 +192,43 @@ def edit_keywords(update, context):
 
 def edit_video(update, context):
     if update['message']['video']:
-        query = "UPDATE video_data SET file_id = ?, file_unique_id = ?, width = ?, height = ?, duration = ? WHERE id = ?"
-        params = (update['message']['video']['file_id'], update['message']['video']['file_unique_id'],
-                  update['message']['video']['width'], update['message']['video']['height'],
-                  update['message']['video']['duration'], context.user_data['edit']['id'])
-
-        # Check if video is shorter than required
         if update['message']['video']['duration'] > settings['max_video_length']:
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=_("error_video_length").format(update['message']['video']['duration'],
                                                     settings['max_video_length']))
+        elif update['message']['video']['mime_type'] in INVALID_MIME_TYPES:
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=_("error_video_type").format(update['message']['video']['mime_type']))
         else:
-            # Upload the video and send it to the channel
-            if utils.execute_query(query=query, parameters=params):
+            try:
+                context.user_data['video'].file_id = update['message']['video']['file_id']
+                context.user_data['video'].file_unique_id = update['message']['video']['file_unique_id']
+                context.user_data['video'].width = update['message']['video']['width']
+                context.user_data['video'].height = update['message']['video']['height']
+                context.user_data['video'].duration = update['message']['video']['duration']
+                orm.session.add(context.user_data['video'])
+                orm.session.commit()
                 utils.videos_info.update_model()
-                context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_video_ok"))
-                if context.user_data['edit']['msg_id']:
+
+                if context.user_data['channel_message'].msg_id:
                     context.bot.edit_message_media(
-                        chat_id=context.user_data['edit']['chat_id'], message_id=context.user_data['edit']['msg_id'],
+                        chat_id=context.user_data['channel_message'].chat_id,
+                        message_id=context.user_data['channel_message'].msg_id,
                         media=InputMediaVideo(
                             update['message']['video']['file_id'],
-                            caption=_("channel_info_caption").format(
-                                context.user_data['edit']['id'],
-                                html.escape(context.user_data['edit']['user_name']),
-                                html.escape(context.user_data['edit']['description']),
-                                html.escape(context.user_data['edit']['keywords'])),
+                            caption=_("channel_info_caption").format(context.user_data['video'].id,
+                                                                     html.escape(context.user_data['user'].user_name or
+                                                                                 context.user_data['user'].last_name),
+                                                                     html.escape(context.user_data['video'].description),
+                                                                     html.escape(context.user_data['video'].keywords)),
                             parse_mode="HTML"))
-            else:
+
+                context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_video_ok"))
+            except Exception:
                 context.bot.send_message(chat_id=update.effective_chat.id, text=_("error"))
+
             return ConversationHandler.END
     else:
         if not update['message']['video']:
