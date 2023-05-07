@@ -28,10 +28,24 @@ Telegram bot to search and send videos in any chat (inline, like [@gif](https://
    ```
    cp .env.example .env
    ```
-5. Edit the `.env` file to add the token obtained in step `#1`.
-6. Build and run the container using docker-compose:
+5. Run this to get your UID and GID:
    ```
-   docker-compose up -d
+   id
+   ```
+   or
+   ```
+   id -u # UID
+   id -g # GID
+   ```
+6. Edit the `.env` file to add the token obtained in step `1.` and the UID and GID in step `5.`. For example:
+   ```
+   VIDEOGRAM_TOKEN=6092251042:AAGxRqK5QlZN7AlhBgVQIzSKAEy7nigsW_8
+   UID=1000
+   GID=1000
+   ```
+7. Build and run the container using docker-compose:
+   ```
+   docker compose up -d
    ```
 
 ## Usage
