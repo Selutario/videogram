@@ -8,6 +8,9 @@ services:
             - TOKEN=${VIDEOGRAM_TOKEN}
         build:
             context: ./
+            args:
+                - "UID=${UID:-1000}"
+                - "GID=${GID:-1000}"
         restart: always
         volumes:
             - ./config:/home/videogram/.config/videogram

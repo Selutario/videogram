@@ -31,7 +31,7 @@ class InstallWithCompile(install):
 
 setup(
     name='videogram',
-    version='2.0.0',
+    version='2.0.1',
     author='Selutario',
     author_email='selutario@gmail.com',
     packages=find_packages(),
