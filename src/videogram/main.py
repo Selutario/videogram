@@ -6,7 +6,7 @@
 import os
 
 from telegram.ext import CommandHandler, InlineQueryHandler, ChosenInlineResultHandler, ChatMemberHandler, Application
-from videogram.handlers import common_handlers, search_handlers
+from videogram.handlers import common_handlers, search_handlers, admin_handlers
 from videogram.handlers.delete_handlers import delete_conv_handler
 from videogram.handlers.edit_handlers import edit_conv_handler
 from videogram.handlers.upload_handlers import upload_conv_handler
@@ -20,11 +20,13 @@ def main():
         print(f'Could not find the bot token. Please set the environment variable "TOKEN": {e}')
         exit(1)
 
-    application.add_handler(ChatMemberHandler(common_handlers.init, 'MY_CHAT_MEMBER'))
+    # Admin handlers
+    application.add_handler(ChatMemberHandler(admin_handlers.init, 'MY_CHAT_MEMBER'))
+    application.add_handler(CommandHandler("get_sent_videos", admin_handlers.get_sent_videos))
+    application.add_handler(CommandHandler("get_db_backup", admin_handlers.send_db_backup))
 
-    # Common commands - answer in Telegram
+    # Common handlers
     application.add_handler(CommandHandler("start", common_handlers.start))
-    application.add_handler(CommandHandler("sent_videos", common_handlers.get_sent_videos))
 
     # Conversation handlers
     application.add_handler(upload_conv_handler)
@@ -35,7 +37,7 @@ def main():
     application.add_handler(InlineQueryHandler(search_handlers.inline_search))
     application.add_handler(ChosenInlineResultHandler(search_handlers.on_chosen_video))
 
-    # log all errors
+    # Log all errors
     application.add_error_handler(common_handlers.error)
 
     # Run the bot until the user presses Ctrl-C
