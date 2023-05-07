@@ -7,7 +7,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from appdirs import site_config_dir
+from appdirs import user_config_dir
 from ruamel.yaml import YAML
 
 yaml = YAML()
@@ -17,18 +17,23 @@ BOT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(BOT_PATH, 'data')
 DEFAULT_SETTINGS_PATH = os.path.join(DATA_PATH, 'settings.yaml')
 
-LOGS_PATH = os.path.join(DATA_PATH, 'bot.log')
-
-CONFIG_DIR = site_config_dir(APP_NAME)
+CONFIG_DIR = user_config_dir(APP_NAME)
 SETTINGS_DIR = os.path.join(CONFIG_DIR, 'settings')
 DB_DIR = os.path.join(CONFIG_DIR, 'databases')
+LOGS_DIR = os.path.join(CONFIG_DIR, 'logs')
 
 SETTINGS_PATH = os.path.join(SETTINGS_DIR, 'settings.yaml')
 DB_PATH = os.path.join(DB_DIR, 'videogram.db')
+LOGS_PATH = os.path.join(LOGS_DIR, 'videogram.log')
+
+INVALID_MIME_TYPES = [
+    'video/quicktime'
+]
 
 try:
-    not os.path.exists(SETTINGS_DIR) and Path(SETTINGS_DIR).mkdir(parents=True, exist_ok=True)
-    not os.path.exists(DB_DIR) and Path(DB_DIR).mkdir(parents=True, exist_ok=True)
+    for folder in [SETTINGS_DIR, DB_DIR, LOGS_DIR]:
+        not os.path.exists(folder) and Path(folder).mkdir(parents=True, exist_ok=True)
+
     if not os.path.exists(SETTINGS_PATH):
         shutil.copyfile(DEFAULT_SETTINGS_PATH, SETTINGS_PATH)
 
@@ -44,7 +49,3 @@ empty_query_videos = min(settings['empty_query_videos'], 50)
 locale_path = os.path.join(BOT_PATH, 'locale')
 language = gettext.translation(settings['language'], locale_path, [settings['language']])
 language.install()
-
-INVALID_MIME_TYPES = [
-    'video/quicktime'
-]

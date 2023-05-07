@@ -18,6 +18,7 @@ sdist/
 var/
 venv/
 config/*
+!config/.gitkeep
 *.egg-info/
 .installed.cfg
 *.egg

@@ -10,4 +10,4 @@ services:
             context: ./
         restart: always
         volumes:
-            - ./config:/etc/xdg/videogram
+            - ./config:/home/videogram/.config/videogram

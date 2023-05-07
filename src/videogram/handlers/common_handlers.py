@@ -44,8 +44,7 @@ async def init(update, context):
 
 async def start(update, context):
     """Send a message when the command /start is issued."""
-    update.message.reply_text(_("start_command").format(settings['bot_name']))
-    utils.store_user_details(update)
+    await update.message.reply_text(_("start_command").format(settings['bot_name']), parse_mode="HTML")
 
 
 async def unknown(update, context):
@@ -77,6 +76,8 @@ async def get_sent_videos(update, context):
             print(e)
             return
 
+        if not sent_videos:
+            await update.message.reply_text(_("no_sent_videos").format(settings['bot_name']), parse_mode="HTML")
         for sent_video, user, video_data in reversed(sent_videos):
             try:
                 date = sent_video.date.replace(tzinfo=ZoneInfo('UTC')).astimezone(

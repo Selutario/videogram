@@ -65,7 +65,7 @@ msgid "init_error"
 msgstr "There was an error initializing the bot: {0}"
 
 msgid "start_command"
-msgstr "Hey. Write @{0} followed by some text to search for a video. For example: @{0} hello"
+msgstr "Hey. Write @{0} followed by some text to search for a video. For example: <code>@{0} hello</code>"
 
 msgid "unknown_command"
 msgstr "Don't invent, please..."
@@ -81,6 +81,9 @@ msgstr "<b>ID:</b> {0}\n"
 "<b>Input:</b> <code>{4}</code>\n"
 "<b>Title:</b> <code>{5}</code>"
 
+msgid "no_sent_videos"
+msgstr "No video has been sent or the option has not been enabled correctly. Talk to @BotFather and make sure the "
+"/setinlinefeedback option is enabled for <code>@{0}</code>"
 
 # delete_handlers.py
 msgid "delete_start"
