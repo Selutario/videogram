@@ -31,7 +31,7 @@ Telegram bot to search and send videos in any chat (inline, like [@gif](https://
 5. Edit the `.env` file to add the token obtained in step `#1`.
 6. Build and run the container using docker-compose:
    ```
-   docker-compose up
+   docker-compose up -d
    ```
 
 ## Usage
@@ -74,6 +74,7 @@ Everybody can now query the bot in all conversations to search and send any of t
 ## Available commands
 
 The bot will answers to these commands:
+- `/random`: Get a randomly chosen video.
 - `/upload`: Upload a new video.
 - `/edit`: Edit the file, title, description or keywords of any previously uploaded video. Only administrator or the user who uploaded the video can edit it.
 - `/delete`: Delete any video. Only administrators can delete videos by default.
@@ -82,7 +83,7 @@ The bot will answers to these commands:
 
 ## Configuration
 
-The configuration file will allow you to modify the administrator users, ban users, enable or disable the uploading, editing or deleting of videos, etc.
+The configuration file will allow you to modify the administrator users, ban users, change language, enable or disable the uploading, editing or deleting of videos, etc.
 
 The file can be found in the repository under this path:
 ```

@@ -27,6 +27,7 @@ def main():
 
     # Common handlers
     application.add_handler(CommandHandler("start", common_handlers.start))
+    application.add_handler(CommandHandler("random", common_handlers.get_random_video))
 
     # Conversation handlers
     application.add_handler(upload_conv_handler)
