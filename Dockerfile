@@ -1,8 +1,8 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 COPY ./src /videogram
 
 RUN apt-get update && apt-get install git python3-pip -y
-RUN pip3 install /videogram
+RUN python3 -m pip install /videogram
 
 CMD ["videogram"]

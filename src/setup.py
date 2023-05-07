@@ -63,6 +63,7 @@ setup(
         "scikit-learn==1.2.2",
         "pyyaml==5.3.1",
         "ruamel.yaml==0.17.4",
+        "appdirs==1.4.4"
     ],
     python_requires=">=3.8.10"
 )

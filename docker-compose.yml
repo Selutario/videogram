@@ -10,4 +10,4 @@ services:
             context: ./
         restart: always
         volumes:
-            - ./src/videogram/data:/usr/local/lib/python3.8/dist-packages/videogram/data
+            - ./config:/etc/xdg/videogram
