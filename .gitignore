@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+venv/
+config/*
+!config/.gitkeep
+*.egg-info/
+.installed.cfg
+*.egg
+*.eggs
+*.db
+*.log
+.env
+
+# Eclipse files
+.cproject
+.project
+.settings/
+.idea
+
+# Visual Studio Code files
+.vscode
