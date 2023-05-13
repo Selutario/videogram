@@ -5,7 +5,8 @@ import logging
 from random import choice
 
 import videogram.utils.orm as orm
-from telegram.ext import ConversationHandler
+from telegram import Update
+from telegram.ext import ConversationHandler, ContextTypes
 from videogram.utils import utils
 from videogram.utils.common import settings, LOGS_PATH
 
@@ -14,26 +15,26 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s: %(message)s'
 logger = logging.getLogger(__name__)
 
 
-async def start(update, context):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send a message when the command /start is issued."""
     await update.message.reply_text(_("start_command").format(settings['bot_name']), parse_mode="HTML")
 
 
-async def unknown(update, context):
+async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=_("unknown_command"))
 
 
-async def cancel(update, context):
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=_("cancel_command"))
     return ConversationHandler.END
 
 
-async def error(update, context):
+async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
-async def get_random_video(update, context):
+async def get_random_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not (update.effective_user.username in settings['admin_usernames'] or not settings['closed_circle'] or
             update.effective_user.username in settings['closed_circle']):
         return

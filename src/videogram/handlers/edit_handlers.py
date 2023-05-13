@@ -4,8 +4,15 @@
 import html
 
 import videogram.utils.orm as orm
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaVideo
-from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, filters, CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaVideo, Update
+from telegram.ext import (
+    ConversationHandler,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    CallbackQueryHandler,
+    ContextTypes
+)
 from videogram.handlers.common_handlers import cancel
 from videogram.utils import utils
 from videogram.utils.common import settings, INVALID_MIME_TYPES
@@ -13,21 +20,14 @@ from videogram.utils.common import settings, INVALID_MIME_TYPES
 EDIT_GET_ID, EDIT_MENU, EDIT_CHOSEN_OPTION, EDIT_TITLE, EDIT_DESC, EDIT_KEYWORDS, EDIT_VIDEO = range(7)
 
 
-async def edit_start(update, context):
-    if not utils.initialized():
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=_("init_required"))
-        return ConversationHandler.END
-    elif (update.effective_user.username in settings['admin_usernames'] or
-          (settings['edit_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
-           (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_start"))
-        return EDIT_GET_ID
-    else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_disabled"))
-        return ConversationHandler.END
+@utils.check_initialized
+@utils.check_media_permission
+async def edit_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=_("edit_start"))
+    return EDIT_GET_ID
 
 
-async def edit_get_id(update, context):
+async def edit_get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update['message']['video']:
         result = orm.session.query(orm.VideoData, orm.ChannelMessages, orm.Users).join(
             orm.ChannelMessages, isouter=True).join(orm.Users, isouter=True).filter(
@@ -73,7 +73,7 @@ async def edit_get_id(update, context):
     return EDIT_CHOSEN_OPTION
 
 
-async def on_chosen_edit_option(update, context):
+async def on_chosen_edit_option(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
 
     if update.callback_query.data == 'title':
@@ -103,7 +103,7 @@ async def on_chosen_edit_option(update, context):
         return ConversationHandler.END
 
 
-async def edit_title(update, context):
+async def edit_title(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update['message']['text'] and len(update['message']['text']) <= settings["max_title_length"]:
         try:
             context.user_data['video'].title = update['message']['text']
@@ -126,7 +126,7 @@ async def edit_title(update, context):
         return EDIT_TITLE
 
 
-async def edit_desc(update, context):
+async def edit_desc(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update['message']['text'] and len(update['message']['text']) <= settings["max_desc_length"]:
         try:
             context.user_data['video'].description = update['message']['text']
@@ -160,7 +160,7 @@ async def edit_desc(update, context):
         return EDIT_DESC
 
 
-async def edit_keywords(update, context):
+async def edit_keywords(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update['message']['text'] and len(update['message']['text']) <= settings["max_kwords_length"]:
         try:
             context.user_data['video'].keywords = update['message']['text']
@@ -194,7 +194,7 @@ async def edit_keywords(update, context):
         return EDIT_KEYWORDS
 
 
-async def edit_video(update, context):
+async def edit_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update['message']['video']:
         if update['message']['video']['duration'] > settings['max_video_length']:
             await context.bot.send_message(

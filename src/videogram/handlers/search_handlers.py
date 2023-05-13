@@ -4,12 +4,13 @@
 import random
 
 import videogram.utils.orm as orm
-from telegram import InlineQueryResultCachedVideo
+from telegram import InlineQueryResultCachedVideo, Update
+from telegram.ext import ContextTypes
 from videogram.utils import utils
 from videogram.utils.common import settings, results_limit, empty_query_videos
 
 
-async def inline_search(update, context):
+async def inline_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.inline_query.query
     inline_results = []
 
@@ -41,7 +42,7 @@ async def inline_search(update, context):
         await context.bot.answer_inline_query(update.inline_query.id, inline_results)
 
 
-async def on_chosen_video(update, context):
+async def on_chosen_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = orm.Users(
         user_id=update.effective_user.id,
         user_name=update.effective_user.username,

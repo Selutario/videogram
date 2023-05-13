@@ -153,30 +153,30 @@ msgstr "I need a video."
 
 
 # upload_handlers.py
-msgid "upld_send_video"
+msgid "upload_send_video"
 msgstr "Send me a video 🎥."
 
 msgid "upload_disabled"
 msgstr "Video upload is disabled 🔒"
 
-msgid "upld_send_title"
+msgid "upload_send_title"
 msgstr "Now send me the title (max {0} characters)."
 
-msgid "upld_send_desc"
+msgid "upload_send_desc"
 msgstr "Now send me a transcription of what is said in the video (max {0} characters)"
 
-msgid "upld_same_video_form"
+msgid "upload_same_video_form"
 msgstr "This other video has a similar description to the one you want to upload. Is it the same one?"
 
-msgid "upld_diff_video"
+msgid "upload_diff_video"
 msgstr "It's different: continue 👍"
 
-msgid "upld_same_video"
+msgid "upload_same_video"
 msgstr "It's the same: cancel 👎"
 
-msgid "upld_send_keywords"
+msgid "upload_send_keywords"
 msgstr "Finally, some keywords that don't appear in the transcription (max {0} characters). For example: "
 "belen esteban sleep tired"
 
-msgid "upld_video_ok"
+msgid "upload_video_ok"
 msgstr "Video uploaded successfully! 🎉\n\n(<b>ID:</b> <code>{0}</code>)"

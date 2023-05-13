@@ -154,30 +154,30 @@ msgstr "Necesito un vídeo."
 
 
 # upload_handlers.py
-msgid "upld_send_video"
+msgid "upload_send_video"
 msgstr "Envíame un video 🎥."
 
 msgid "upload_disabled"
 msgstr "La subida de videos está desactivada 🔒"
 
-msgid "upld_send_title"
+msgid "upload_send_title"
 msgstr "Ahora envíame el título (max {0} caracteres)."
 
-msgid "upld_send_desc"
+msgid "upload_send_desc"
 msgstr "Ahora una transcripción de lo que se dice en el vídeo (max {0} caracteres)"
 
-msgid "upld_same_video_form"
+msgid "upload_same_video_form"
 msgstr "Este otro vídeo tiene una descripción bastante similar al que quieres subir. ¿Es el mismo?"
 
-msgid "upld_diff_video"
+msgid "upload_diff_video"
 msgstr "Es distinto: continuar 👍"
 
-msgid "upld_same_video"
+msgid "upload_same_video"
 msgstr "Es el mismo: cancelar 👎"
 
-msgid "upld_send_keywords"
+msgid "upload_send_keywords"
 msgstr "Por último, algunas palabras clave que no aparezcan en la transcripción (max {0} caracteres). "
 "P. ej: belen esteban sueño cansado cansada"
 
-msgid "upld_video_ok"
+msgid "upload_video_ok"
 msgstr "¡Video subido con éxito! 🎉\n\n(<b>ID:</b> <code>{0}</code>)"

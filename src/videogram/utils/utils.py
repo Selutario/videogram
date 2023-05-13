@@ -1,6 +1,7 @@
 # Created by Selutario <selutario@gmail.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv3
 
+import functools
 import re
 import string
 
@@ -10,13 +11,39 @@ from numpy.linalg import norm
 from pandas import DataFrame
 from ruamel.yaml import YAML
 from sklearn.feature_extraction.text import TfidfVectorizer
+from telegram.ext import ConversationHandler
 from videogram.utils.common import SETTINGS_PATH, settings
 
 yaml = YAML()
 
 
-def initialized():
-    return settings['bot_name'] and settings['admin_usernames'] and settings['channel_id']
+def check_initialized(func):
+    @functools.wraps(func)
+    async def wrapper_initialized(*args, **kwargs):
+        if bool(settings['channel_id']):
+            return await func(*args, **kwargs)
+        else:
+            await args[1].bot.send_message(chat_id=args[0].effective_chat.id, text=_("init_required"))
+            return ConversationHandler.END
+
+    return wrapper_initialized
+
+
+def check_media_permission(func):
+    @functools.wraps(func)
+    async def wrapper_check_media_permission(*args, **kwargs):
+        action_name = func.__name__.split('_')[0]
+
+        if (args[0].effective_user.username in settings['admin_usernames'] or
+              (settings[f"{action_name}_enabled"] and
+               args[0].effective_user.username not in settings['banned_usernames'] and (
+                       not settings['closed_circle'] or args[0].effective_user.username in settings['closed_circle']))):
+            return await func(*args, **kwargs)
+        else:
+            await args[1].bot.send_message(chat_id=args[0].effective_chat.id, text=_(f"{action_name}_disabled"))
+            return ConversationHandler.END
+
+    return wrapper_check_media_permission
 
 
 def store_settings(field, value):

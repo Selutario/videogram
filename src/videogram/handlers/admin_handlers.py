@@ -6,11 +6,13 @@ from zoneinfo import ZoneInfo
 
 import videogram.utils.orm as orm
 from dateutil import tz
+from telegram import Update
+from telegram.ext import ContextTypes
 from videogram.utils import utils
 from videogram.utils.common import settings, DB_PATH
 
 
-async def init(update, context):
+async def init(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Extract and store bot, user and channel details."""
     if not utils.initialized() and update.my_chat_member.new_chat_member.status == 'administrator':
         try:
@@ -30,13 +32,13 @@ async def init(update, context):
                                            parse_mode="HTML")
     elif settings['channel_id'] == update.effective_chat.id and \
             update.my_chat_member.new_chat_member.status in ['kicked', 'left']:
-        utils.store_settings('bot_name', '')
         utils.store_settings('admin_usernames', [])
         utils.store_settings('backup_user_id', 0)
         utils.store_settings('channel_id', 0)
 
 
-async def get_sent_videos(update, context):
+@utils.check_initialized
+async def get_sent_videos(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.username in settings['admin_usernames']:
         try:
             parameters = int(context.args[0])
@@ -71,7 +73,8 @@ async def get_sent_videos(update, context):
                 print(f"Error: {sent_videos} | {e}")
 
 
-async def send_db_backup(update, context):
+@utils.check_initialized
+async def send_db_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.username in settings['admin_usernames']:
         with open(DB_PATH, 'rb') as db_file:
             await context.bot.sendDocument(chat_id=update.effective_chat.id, document=db_file)

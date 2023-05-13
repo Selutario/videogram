@@ -4,8 +4,15 @@
 import html
 
 import videogram.utils.orm as orm
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ConversationHandler, MessageHandler, CommandHandler, filters, CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import (
+    ConversationHandler,
+    MessageHandler,
+    CommandHandler,
+    filters,
+    CallbackQueryHandler,
+    ContextTypes
+)
 from videogram.handlers.common_handlers import cancel
 from videogram.utils import utils
 from videogram.utils.common import *
@@ -13,21 +20,14 @@ from videogram.utils.common import *
 DELETE_GET_ID, DELETE_CHOSEN_OPTION = range(2)
 
 
-async def delete_start(update, context):
-    if not utils.initialized():
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=_("init_required"))
-        return ConversationHandler.END
-    elif (update.effective_user.username in settings['admin_usernames'] or
-          (settings['delete_enabled'] and update.effective_user.username not in settings['banned_usernames'] and
-           (not settings['closed_circle'] or update.effective_user.username in settings['closed_circle']))):
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=_("delete_start"))
-        return DELETE_GET_ID
-    else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=_("delete_disabled"))
-        return ConversationHandler.END
+@utils.check_initialized
+@utils.check_media_permission
+async def delete_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=_("delete_start"))
+    return DELETE_GET_ID
 
 
-async def delete_get_id(update, context):
+async def delete_get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update['message']['video']:
         result = orm.session.query(orm.VideoData, orm.ChannelMessages).join(orm.ChannelMessages, isouter=True).filter(
             orm.VideoData.file_unique_id == update['message']['video']['file_unique_id']).first()
@@ -62,7 +62,7 @@ async def delete_get_id(update, context):
     return DELETE_CHOSEN_OPTION
 
 
-async def on_chosen_delete_option(update, context):
+async def on_chosen_delete_option(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
 
     if update.callback_query.data == 'yes':
